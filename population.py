@@ -51,6 +51,7 @@ with open("populate_database.sql", "w") as f:
         menu_inserts.append(f"({i}, {price}, {inventory_id})")
     f.write(f"INSERT INTO Menu_Item (Menu_ID, Price, Menu_Inventory) VALUES {', '.join(menu_inserts)};\n")
 
+
     # insert employee info
     f.write("-- SQL script to insert employees into Employee table\n")
     for emp_id, first_name, last_name, position in employees:
@@ -66,10 +67,12 @@ with open("populate_database.sql", "w") as f:
         customer_inserts.append(f"({cust_id}, {phone})")
 
     f.write(f"INSERT INTO Customer (Customer_ID, Phone_number) VALUES {', '.join(customer_inserts)};\n")
+
     
     # Insert Orders (Bulk)
     order_inserts = []
     order_details = []
+
     timestamps = generate_timestamps()
     total_sales = 0
     order_id = 1
@@ -88,6 +91,7 @@ with open("populate_database.sql", "w") as f:
         # Link Orders to Menu Items
         for i in range(random.randint(1, 5)):
             menu_id = random.randint(1, delta_menu_items)
+
             junction_id = f"{order_id}-{i+1}"
             order_details.append(f"('{junction_id}', {menu_id}, {order_id})")
         
@@ -99,8 +103,7 @@ with open("populate_database.sql", "w") as f:
     
     # Insert Junction Table (Bulk)
     f.write(f"INSERT INTO C_M_Junction (ID, Menu_ID, Order_ID) VALUES {', '.join(order_details)};\n")
-    
-    
+
     
     # Commit Transaction
     f.write("COMMIT;\n")
