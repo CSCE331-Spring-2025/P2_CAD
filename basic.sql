@@ -1,21 +1,22 @@
-CREATE TABLE customer_order (
-    Order_ID INT PRIMARY KEY,
-    Time TIMESTAMP NOT NULL,
-    Total_Price FLOAT NOT NULL
-);
 
 CREATE TABLE Employee (
     Employee_ID INT PRIMARY KEY,
-    First_name CHAR(50) NOT NULL,
-    Last_name CHAR(50) NOT NULL,
-    Position CHAR(50) NOT NULL,
-    Order_ID INT,
-    FOREIGN KEY (Order_ID) REFERENCES customer_order(Order_ID)
+    First_name CHAR(10) NOT NULL,
+    Last_name CHAR(10) NOT NULL,
+    Position CHAR(10) NOT NULL
+);
+
+CREATE TABLE customer_order (
+    Order_ID INT PRIMARY KEY,
+    Time TIMESTAMP NOT NULL,
+    Total_Price FLOAT NOT NULL,
+    Employee_ID INT,
+    FOREIGN KEY (Employee_ID) REFERENCES Employee(Employee_ID)
 );
 
 CREATE TABLE Customer (
     Customer_ID INT PRIMARY KEY,
-    Phone_number INT NOT NULL,
+    Phone_number BIGINT NOT NULL,
     Order_ID INT,
     FOREIGN KEY (Order_ID) REFERENCES customer_order(Order_ID)
 );
@@ -23,7 +24,7 @@ CREATE TABLE Customer (
 CREATE TABLE Inventory (
     Inventory_ID INT PRIMARY KEY,
     Current_Number INT NOT NULL,
-    Name CHAR(100) NOT NULL,
+    Name CHAR(20) NOT NULL,
     Supply_Order_History INT
 );
 
@@ -56,10 +57,12 @@ CREATE TABLE M_I_Junction (
 // Delete the tables
 // try several times
 
-DROP TABLE customer_order;
-DROP TABLE Employee;
-DROP TABLE Customer;
-DROP TABLE Inventory;
-DROP TABLE Menu_Item;
+DROP Table M_I_Junction;
 DROP TABLE C_M_Junction;
-DROP Table M_I_Junction; */
+DROP TABLE Menu_Item;
+DROP TABLE Inventory;
+DROP TABLE Employee;
+DROP TABLE Customer; 
+DROP TABLE customer_order;
+
+*/
