@@ -9,6 +9,16 @@ delta_menu_items = 20  # Number of menu items
 epsilon_queries = 15  # Number of required queries
 theta_special_queries = 4  # Number of special queries
 
+# employee
+employees = [
+    (1, 'Alice', 'Johnson', 'Manager'),
+    (2, 'Bob', 'Smith', 'Cashier'),
+    (3, 'Charlie', 'Brown', 'Cashier'),
+    (4, 'David', 'Wilson', 'Cashier'),
+    (5, 'Eve', 'Davis', 'Cashier'),
+    (6, 'Frank', 'Miller', 'Cashier')
+]
+
 # Generate order timestamps
 def generate_timestamps(weeks=alpha_weeks):
     start_date = datetime.datetime.now() - datetime.timedelta(weeks=weeks)
@@ -40,46 +50,60 @@ with open("populate_database.sql", "w") as f:
         inventory_id = random.randint(1, len(inventory_items))
         menu_inserts.append(f"({i}, {price}, {inventory_id})")
     f.write(f"INSERT INTO Menu_Item (Menu_ID, Price, Menu_Inventory) VALUES {', '.join(menu_inserts)};\n")
+
+
+    # insert employee info
+    f.write("-- SQL script to insert employees into Employee table\n")
+    for emp_id, first_name, last_name, position in employees:
+        sql = f"INSERT INTO Employee (Employee_ID, First_name, Last_name, Position) VALUES ({emp_id}, '{first_name}', '{last_name}', '{position}');\n"
+        f.write(sql)
+
+    # Insert Customers (Bulk)
+    customer_inserts = []
+    num_customers = 10000  # Adjust based on how many customers you want
+
+    for cust_id in range(1, num_customers + 1):  # Customer_ID increments by 1
+        phone = random.randint(1000000000, 9999999999)
+        customer_inserts.append(f"({cust_id}, {phone})")
+
+    f.write(f"INSERT INTO Customer (Customer_ID, Phone_number) VALUES {', '.join(customer_inserts)};\n")
+
     
     # Insert Orders (Bulk)
     order_inserts = []
     order_details = []
-    timestamps = generate_timestamps()  # Get the list of ordered timestamps
+
+    timestamps = generate_timestamps()
     total_sales = 0
     order_id = 1
 
-    # Use timestamps in order without randomness
+    # employee id list
+    employee_id_list = [1,2,3,4,5,6]
+
     while total_sales < beta_sales:
-        timestamp = timestamps.pop(0)  # Pop the first timestamp to maintain sequential order
+        timestamp = random.choice(timestamps)
         order_total = round(random.uniform(20, 100), 2)
         total_sales += order_total
-        order_inserts.append(f"({order_id}, '{timestamp.isoformat()}', {order_total})")
+        employee_id = random.choice(employee_id_list)
+        customer_id = random.randint(1, num_customers)
+        order_inserts.append(f"({order_id}, '{timestamp.isoformat()}', {order_total}, {employee_id}, {customer_id})")
         
         # Link Orders to Menu Items
-        for _ in range(random.randint(1, 5)):
+        for i in range(random.randint(1, 5)):
             menu_id = random.randint(1, delta_menu_items)
-            order_details.append(f"({order_id}, {menu_id}, {order_id})")
+
+            junction_id = f"{order_id}-{i+1}"
+            order_details.append(f"('{junction_id}', {menu_id}, {order_id})")
         
         order_id += 1
 
+    
     # Insert all orders in bulk
-    f.write(f"INSERT INTO customer_order (Order_ID, Time, Total_Price) VALUES {', '.join(order_inserts)};\n")
-
+    f.write(f"INSERT INTO customer_order (Order_ID, Time, Total_Price, Employee_ID, Customer_ID) VALUES {', '.join(order_inserts)};\n")
     
     # Insert Junction Table (Bulk)
     f.write(f"INSERT INTO C_M_Junction (ID, Menu_ID, Order_ID) VALUES {', '.join(order_details)};\n")
-    
-    # Insert Employees (Bulk)
-    employee_inserts = [f"({emp_id}, 'Emp{emp_id}', 'Last{emp_id}', 'Cashier')" for emp_id in range(1, 11)]
-    f.write(f"INSERT INTO Employee (Employee_ID, First_name, Last_name, Position) VALUES {', '.join(employee_inserts)};\n")
-    
-    # Insert Customers (Bulk)
-    customer_inserts = []
-    for cust_id in range(1, order_id // 2):
-        phone = random.randint(1000000000, 9999999999)
-        order_ref = random.randint(1, order_id - 1)
-        customer_inserts.append(f"({cust_id}, {phone}, {order_ref})")
-    f.write(f"INSERT INTO Customer (Customer_ID, Phone_number, Order_ID) VALUES {', '.join(customer_inserts)};\n")
+
     
     # Commit Transaction
     f.write("COMMIT;\n")
