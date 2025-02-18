@@ -56,6 +56,16 @@ with open("populate_database.sql", "w") as f:
     for emp_id, first_name, last_name, position in employees:
         sql = f"INSERT INTO Employee (Employee_ID, First_name, Last_name, Position) VALUES ({emp_id}, '{first_name}', '{last_name}', '{position}');\n"
         f.write(sql)
+
+    # Insert Customers (Bulk)
+    customer_inserts = []
+    num_customers = 10000  # Adjust based on how many customers you want
+
+    for cust_id in range(1, num_customers + 1):  # Customer_ID increments by 1
+        phone = random.randint(1000000000, 9999999999)
+        customer_inserts.append(f"({cust_id}, {phone})")
+
+    f.write(f"INSERT INTO Customer (Customer_ID, Phone_number) VALUES {', '.join(customer_inserts)};\n")
     
     # Insert Orders (Bulk)
     order_inserts = []
@@ -72,29 +82,25 @@ with open("populate_database.sql", "w") as f:
         order_total = round(random.uniform(20, 100), 2)
         total_sales += order_total
         employee_id = random.choice(employee_id_list)
-        order_inserts.append(f"({order_id}, '{timestamp.isoformat()}', {order_total}, {employee_id})")
+        customer_id = random.randint(1, num_customers)
+        order_inserts.append(f"({order_id}, '{timestamp.isoformat()}', {order_total}, {employee_id}, {customer_id})")
         
         # Link Orders to Menu Items
-        for _ in range(random.randint(1, 5)):
+        for i in range(random.randint(1, 5)):
             menu_id = random.randint(1, delta_menu_items)
-            order_details.append(f"({order_id}, {menu_id}, {order_id})")
+            junction_id = f"{order_id}-{i+1}"
+            order_details.append(f"('{junction_id}', {menu_id}, {order_id})")
         
         order_id += 1
+
     
     # Insert all orders in bulk
-    f.write(f"INSERT INTO customer_order (Order_ID, Time, Total_Price) VALUES {', '.join(order_inserts)};\n")
+    f.write(f"INSERT INTO customer_order (Order_ID, Time, Total_Price, Employee_ID, Customer_ID) VALUES {', '.join(order_inserts)};\n")
     
     # Insert Junction Table (Bulk)
     f.write(f"INSERT INTO C_M_Junction (ID, Menu_ID, Order_ID) VALUES {', '.join(order_details)};\n")
     
     
-    # Insert Customers (Bulk)
-    customer_inserts = []
-    for cust_id in range(1, order_id // 2):
-        phone = random.randint(1000000000, 9999999999)
-        order_ref = random.randint(1, order_id - 1)
-        customer_inserts.append(f"({cust_id}, {phone}, {order_ref})")
-    f.write(f"INSERT INTO Customer (Customer_ID, Phone_number, Order_ID) VALUES {', '.join(customer_inserts)};\n")
     
     # Commit Transaction
     f.write("COMMIT;\n")

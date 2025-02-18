@@ -24,14 +24,12 @@ LIMIT 10;
 -----------------------------------------------------------------------------
 
 -- #1 Order by day of the week
-
 SELECT TO_CHAR(Time, 'Day') AS order_day, COUNT(Order_ID) AS total_orders
 FROM customer_order
 GROUP BY order_day
 ORDER BY total_orders DESC; 
 
 -- #2 average daily sale
-
 SELECT AVG(daily_total) AS avg_daily_sale
 FROM (
     SELECT time::date AS order_date, SUM(total_price) AS daily_total
@@ -63,3 +61,44 @@ SELECT Inventory_ID, Name, Current_Number
 FROM Inventory
 ORDER BY Current_Number ASC
 LIMIT 10;
+
+-- #7 find highest inventory items
+SELECT Inventory_ID, Name, Current_Number
+FROM Inventory
+ORDER BY Current_Number DESC
+LIMIT 10;
+
+-- #8: Least Selling Menu Items
+SELECT mi.Menu_ID, mi.Name, SUM(mi.Price) AS total_revenue
+FROM Menu_Item mi
+JOIN C_M_Junction cmj ON mi.Menu_ID = cmj.Menu_ID
+GROUP BY mi.Menu_ID, mi.Name
+ORDER BY total_revenue ASC
+LIMIT 10;
+
+-- #9: most Selling Menu Items
+SELECT mi.Menu_ID, mi.Name, SUM(mi.Price) AS total_revenue
+FROM Menu_Item mi
+JOIN C_M_Junction cmj ON mi.Menu_ID = cmj.Menu_ID
+GROUP BY mi.Menu_ID, mi.Name
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+-- #10 Shows revenue for each day in the past 30 days
+SELECT Time::date AS order_date, SUM(Total_Price) AS daily_revenue
+FROM customer_order
+WHERE Time >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY order_date
+ORDER BY order_date;
+
+-- #11 Most expensive item
+SELECT Menu_ID, Name, Price
+FROM Menu_Item
+ORDER BY Price DESC
+LIMIT 1;
+
+-- #12 Least expensive item
+SELECT Menu_ID, Name, Price
+FROM Menu_Item
+ORDER BY Price ASC
+LIMIT 1;
