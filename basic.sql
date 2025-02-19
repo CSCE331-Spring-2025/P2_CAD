@@ -62,8 +62,8 @@ DROP Table M_I_Junction;
 DROP TABLE C_M_Junction;
 DROP TABLE Menu_Item;
 DROP TABLE Inventory;
+DROP TABLE customer_order;
 DROP TABLE Employee;
 DROP TABLE Customer; 
-DROP TABLE customer_order;
 
 */
