@@ -102,3 +102,11 @@ SELECT Menu_ID, Name, Price
 FROM Menu_Item
 ORDER BY Price ASC
 LIMIT 1;
+
+-- Find the top 10 customers who have spent the most money in total.
+SELECT c.Customer_ID, SUM(co.Total_Price) AS total_spent
+FROM Customer c
+JOIN customer_order co ON c.Order_ID = co.Order_ID
+GROUP BY c.Customer_ID
+ORDER BY total_spent DESC
+LIMIT 10;
