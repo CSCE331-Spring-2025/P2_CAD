@@ -1,5 +1,5 @@
-import java.sql.*;
 import java.awt.event.*;
+import java.sql.*;
 import javax.swing.*;
 
 /*
@@ -16,16 +16,14 @@ public class GUI extends JFrame implements ActionListener {
     public static void main(String[] args) {
         // Building the connection
         Connection conn = null;
-        String database_name = "team_cad_db";
-        String database_user = "team_cad";
-        String database_password = "cad";
-        String database_url = String.format("jdbc:postgresql://csce-315-db.engr.tamu.edu/%s", database_name);
 
+        dbSetup my = new dbSetup();
         try {
-            conn = DriverManager.getConnection(database_url, database_user, database_password);
+            conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
+            my.user, my.pswd);
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Database Connection Failed!");
+            System.err.println(e.getClass().getName()+": "+e.getMessage());
             System.exit(0);
         }
         JOptionPane.showMessageDialog(null, "Opened database successfully");
