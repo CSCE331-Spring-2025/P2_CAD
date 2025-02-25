@@ -1,36 +1,31 @@
 {
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
             "type": "java",
             "name": "Current File",
             "request": "launch",
-            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
+            "vmArgs": "--module-path \"C:/JavaFX/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
             "mainClass": "${file}"
         },
         {
             "type": "java",
             "name": "GUI",
             "request": "launch",
-            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
+            "vmArgs": "--module-path \"C:/JavaFX/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
             "mainClass": "GUI",
-            "projectName": "P2_CAD_25d47d06"
+            "projectName": "P2_CAD_45d24558"
         },
         {
             "type": "java",
-            "name": "jdbcpostgreSQL",
+            "name": "POSApplication",
             "request": "launch",
-            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
-            "mainClass": "jdbcpostgreSQL",
-            "projectName": "P2_CAD_25d47d06"
-        },
-        {
-            "type": "java",
-            "name": "jdbcpostgreSQLGUI",
-            "request": "launch",
-            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
-            "mainClass": "jdbcpostgreSQLGUI",
-            "projectName": "P2_CAD_25d47d06"
+            "vmArgs": "--module-path \"C:/JavaFX/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
+            "mainClass": "POSApplication",
+            "projectName": "P2_CAD_45d24558"
         }
     ]
 }
