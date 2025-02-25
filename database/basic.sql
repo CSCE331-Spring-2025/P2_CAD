@@ -13,7 +13,7 @@ CREATE TABLE Customer (
 );
 
 CREATE TABLE customer_order (
-    Order_ID INT PRIMARY KEY,
+    Order_ID serial PRIMARY KEY,
     Time TIMESTAMP NOT NULL,
     Total_Price FLOAT NOT NULL,
     Employee_ID INT,
@@ -34,22 +34,21 @@ CREATE TABLE Inventory (
 CREATE TABLE Menu_Item (
     Menu_ID INT PRIMARY KEY,
     Price FLOAT NOT NULL,
-    name VARCHAR(50), 
-    Menu_Inventory INT,
-    FOREIGN KEY (Menu_Inventory) REFERENCES Inventory(Inventory_ID)
+    name VARCHAR(50)
 );
 
 CREATE TABLE C_M_Junction (
-    ID VARCHAR(50) PRIMARY KEY,
-    Menu_ID INT,
     Order_ID INT,
+    Menu_ID INT,
+    Quantity INT NOT NULL,
+    PRIMARY KEY (Order_ID, Menu_ID),
     FOREIGN KEY (Menu_ID) REFERENCES Menu_Item(Menu_ID),
     FOREIGN KEY (Order_ID) REFERENCES customer_order(Order_ID)
 );
 
 -- Menu / Inventory Junction Table
 CREATE TABLE M_I_Junction (
-    MI_ID INT PRIMARY KEY,
+    MI_ID serial PRIMARY KEY,
     Menu_ID INT,
     Inventory_ID INT,
     FOREIGN KEY (Menu_ID) REFERENCES Menu_Item(Menu_ID),
@@ -69,4 +68,29 @@ DROP TABLE customer_order;
 DROP TABLE Employee;
 DROP TABLE Customer; 
 
+DROP TRIGGER IF EXISTS trigger_update_total_price ON C_M_Junction;
+DROP FUNCTION IF EXISTS update_total_price();
+
 */
+
+
+CREATE OR REPLACE FUNCTION update_total_price()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE customer_order
+    SET Total_Price = (
+        SELECT COALESCE(SUM(mi.Price * cmj.Quantity), 0)  -- 주문이 없을 경우 NULL 방지
+        FROM C_M_Junction cmj
+        JOIN Menu_Item mi ON cmj.Menu_ID = mi.Menu_ID
+        WHERE cmj.Order_ID = NEW.Order_ID
+    )
+    WHERE Order_ID = NEW.Order_ID;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_total_price
+AFTER INSERT OR UPDATE OR DELETE ON C_M_Junction
+FOR EACH ROW EXECUTE FUNCTION update_total_price();
+
