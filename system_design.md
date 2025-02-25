@@ -1,4 +1,12 @@
 ### basic system design
+## requirements
+The interface should support two groups of users: cashiers/customers and managers.  At a minimum, it should allow:
+- cashiers/customers to submit orders.
+- managers to view, add, and update the items and prices on their menu.
+- managers to view, add, and update the items and quantities in their inventory.
+- managers to add, update, and manage employees.
+- managers to create needed reports.
+
 <br>
 
 # page 0 : login page 
