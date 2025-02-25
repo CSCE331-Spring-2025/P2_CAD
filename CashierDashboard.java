@@ -19,7 +19,7 @@ public class CashierDashboard extends JFrame {
         JButton btnNewOrder = new JButton("New Order");
         JButton btnOrderHistory = new JButton("Order History");
         
-        btnNewOrder.addActionListener(e -> new OrderPage().setVisible(true));
+        btnNewOrder.addActionListener(e -> new OrderPage(rootPaneCheckingEnabled).setVisible(true));
         btnOrderHistory.addActionListener(e -> new OrderHistoryPage().setVisible(true));
         
         JPanel btnPanel = new JPanel();
