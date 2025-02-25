@@ -3,7 +3,8 @@ CREATE TABLE Employee (
     Employee_ID INT PRIMARY KEY,
     First_name VARCHAR(50) NOT NULL,
     Last_name VARCHAR(50) NOT NULL,
-    Position VARCHAR(50) NOT NULL
+    Position VARCHAR(50) NOT NULL,
+    pin INT
 );
 
 CREATE TABLE Customer (
@@ -17,6 +18,8 @@ CREATE TABLE customer_order (
     Total_Price FLOAT NOT NULL,
     Employee_ID INT,
     Customer_ID INT,
+    custom VARCHAR(50),
+    status VARCHAR(50),
     FOREIGN KEY (Employee_ID) REFERENCES Employee(Employee_ID),
     FOREIGN KEY (Customer_ID) REFERENCES customer(Customer_ID)
 );
@@ -25,7 +28,7 @@ CREATE TABLE Inventory (
     Inventory_ID INT PRIMARY KEY,
     Current_Number INT NOT NULL,
     Name VARCHAR(50) NOT NULL,
-    Supply_Order_History INT
+    category VARCHAR(50)
 );
 
 CREATE TABLE Menu_Item (
