@@ -4,15 +4,9 @@ import java.sql.*;
 import javax.swing.*;
 
 public class POSApplication extends JFrame implements ActionListener {
-<<<<<<< HEAD
-    // Use CardLayout to manage different "pages"
-    private final CardLayout cardLayout = new CardLayout();
-    private final JPanel cardPanel = new JPanel(cardLayout);
-=======
     // CardLayout to manage different "pages"
     private CardLayout cardLayout = new CardLayout();
     private JPanel cardPanel = new JPanel(cardLayout);
->>>>>>> origin/sareem
 
     // Database credentials using dbSetup
     private static final String DB_URL = "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db";
@@ -20,37 +14,16 @@ public class POSApplication extends JFrame implements ActionListener {
     private static final String DB_PASSWORD = dbSetup.pswd;
 
     // Panel names
-<<<<<<< HEAD
-    private static final String MANAGER_PAGE = "Manager";
-    private static final String CASHIER_PAGE = "Cashier";
-    private static final String INVENTORY_PAGE = "Inventory";
-
-    // Database connection
-    private Connection conn;
-=======
     private final String MANAGER_PAGE = "Manager";
     private final String CASHIER_PAGE = "Cashier";
     private final String INVENTORY_PAGE = "Inventory";
     private final String EMPLOYEE_PAGE = "Employees";
->>>>>>> origin/sareem
 
     public POSApplication() {
         setTitle("POS System - Manager Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
-<<<<<<< HEAD
-        setLocationRelativeTo(null);
-
-        // Establish database connection
-        try {
-            conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        } catch (SQLException e) {
-            showError("Database Connection Failed. Check credentials.", e);
-            return;
-        }
-=======
         setLocationRelativeTo(null); // Center window
->>>>>>> origin/sareem
 
         // Create pages
         JPanel managerPanel = createManagerPanel();
@@ -66,23 +39,6 @@ public class POSApplication extends JFrame implements ActionListener {
 
         add(cardPanel, BorderLayout.CENTER);
 
-<<<<<<< HEAD
-        // Create navigation buttons
-        JPanel navPanel = new JPanel();
-        String[] pages = {MANAGER_PAGE, CASHIER_PAGE, INVENTORY_PAGE};
-        for (String page : pages) {
-            JButton button = new JButton(page);
-            button.setActionCommand(page);
-            button.addActionListener(this);
-            navPanel.add(button);
-        }
-
-        // Add navigation panel to the bottom
-        add(navPanel, BorderLayout.SOUTH);
-    }
-
-    /** Creates the Manager Panel */
-=======
         // Navigation panel at the bottom
         JPanel navPanel = new JPanel();
         JButton btnManager = new JButton("Manager");
@@ -109,7 +65,6 @@ public class POSApplication extends JFrame implements ActionListener {
     }
 
     // Manager panel: displays sales trends
->>>>>>> origin/sareem
     private JPanel createManagerPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Manager Page: Sales Trends", SwingConstants.CENTER);
@@ -118,31 +73,28 @@ public class POSApplication extends JFrame implements ActionListener {
 
         JTextArea trendsArea = new JTextArea();
         trendsArea.setEditable(false);
-        panel.add(new JScrollPane(trendsArea), BorderLayout.CENTER);
 
-        // Load data asynchronously
-        loadDataAsync(() -> {
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT SUM(Total_Price) AS TotalSales FROM customer_order")) {
-                try {
-                    if (rs.next()) {
-                        trendsArea.setText("Total Sales: $" + rs.getDouble("TotalSales"));
-                    } else {
-                        trendsArea.setText("No data available.");
-                    }
-                } catch (SQLException e) {
-                }
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT SUM(Total_Price) AS TotalSales FROM customer_order");
+
+            if (rs.next()) {
+                trendsArea.setText("Total Sales: $" + rs.getDouble("TotalSales"));
+            } else {
+                trendsArea.setText("No data available.");
             }
-        }, trendsArea);
+            conn.close();
+        } catch (Exception e) {
+            trendsArea.setText("Error connecting to database.");
+            e.printStackTrace();
+        }
 
+        panel.add(new JScrollPane(trendsArea), BorderLayout.CENTER);
         return panel;
     }
 
-<<<<<<< HEAD
-    /** Creates the Cashier Panel */
-=======
     // Cashier panel: displays menu items
->>>>>>> origin/sareem
     private JPanel createCashierPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Cashier Page: Menu", SwingConstants.CENTER);
@@ -151,31 +103,26 @@ public class POSApplication extends JFrame implements ActionListener {
 
         JTextArea menuArea = new JTextArea();
         menuArea.setEditable(false);
-        panel.add(new JScrollPane(menuArea), BorderLayout.CENTER);
 
-        // Load data asynchronously
-        loadDataAsync(() -> {
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT name, Price FROM Menu_Item")) {
-                StringBuilder menu = new StringBuilder();
-                try {
-                    while (rs.next()) {
-                        menu.append(rs.getString("name")).append(" - $").append(rs.getDouble("Price")).append("\n");
-                    }
-                } catch (SQLException e) {
-                }
-                menuArea.setText(menu.toString());
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT name, Price FROM Menu_Item");
+
+            while (rs.next()) {
+                menuArea.append(rs.getString("name") + " - $" + rs.getDouble("Price") + "\n");
             }
-        }, menuArea);
+            conn.close();
+        } catch (Exception e) {
+            menuArea.setText("Error fetching menu.");
+            e.printStackTrace();
+        }
 
+        panel.add(new JScrollPane(menuArea), BorderLayout.CENTER);
         return panel;
     }
 
-<<<<<<< HEAD
-    /** Creates the Inventory Panel */
-=======
     // Inventory panel: displays inventory items
->>>>>>> origin/sareem
     private JPanel createInventoryPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Inventory Page", SwingConstants.CENTER);
@@ -184,24 +131,22 @@ public class POSApplication extends JFrame implements ActionListener {
 
         JTextArea inventoryArea = new JTextArea();
         inventoryArea.setEditable(false);
-        panel.add(new JScrollPane(inventoryArea), BorderLayout.CENTER);
 
-        // Load data asynchronously
-        loadDataAsync(() -> {
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT Name, Current_Number FROM Inventory")) {
-                StringBuilder inventory = new StringBuilder();
-                try {
-                    while (rs.next()) {
-                        inventory.append(rs.getString("Name")).append(" - ")
-                                .append(rs.getInt("Current_Number")).append(" in stock\n");
-                    }
-                } catch (SQLException e) {
-                }
-                inventoryArea.setText(inventory.toString());
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT Name, Current_Number FROM Inventory");
+
+            while (rs.next()) {
+                inventoryArea.append(rs.getString("Name") + " - " + rs.getInt("Current_Number") + " in stock\n");
             }
-        }, inventoryArea);
+            conn.close();
+        } catch (Exception e) {
+            inventoryArea.setText("Error fetching inventory.");
+            e.printStackTrace();
+        }
 
+        panel.add(new JScrollPane(inventoryArea), BorderLayout.CENTER);
         return panel;
     }
     
@@ -232,57 +177,12 @@ public class POSApplication extends JFrame implements ActionListener {
         return panel;
     }
 
-<<<<<<< HEAD
-    /** Handles navigation between pages */
-=======
->>>>>>> origin/sareem
     @Override
     public void actionPerformed(ActionEvent e) {
         cardLayout.show(cardPanel, e.getActionCommand());
     }
 
-    /** Loads data asynchronously */
-    private void loadDataAsync(Runnable queryTask, JTextArea outputArea) {
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() {
-                try {
-                    queryTask.run();
-                } catch (Exception e) {
-                    SwingUtilities.invokeLater(() -> outputArea.setText("Error fetching data."));
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        }.execute();
-    }
-
-    /** Displays an error message */
-    private void showError(String message, Exception e) {
-        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace();
-    }
-
-    /** Closes the database connection */
-    private void closeConnection() {
-        if (conn != null) {
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /** Main method */
     public static void main(String[] args) {
-<<<<<<< HEAD
-        SwingUtilities.invokeLater(() -> {
-            POSApplication app = new POSApplication();
-            app.setVisible(true);
-        });
-=======
         SwingUtilities.invokeLater(() -> new POSApplication().setVisible(true));
->>>>>>> origin/sareem
     }
 }

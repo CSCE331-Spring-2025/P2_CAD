@@ -15,7 +15,7 @@ public class OrderHistoryPage extends JFrame {
         try {
             Connection conn = DriverManager.getConnection("jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db", dbSetup.user, dbSetup.pswd);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT Order_ID, Total_Price, Time FROM customer_order ORDER BY Time DESC");
+            ResultSet rs = stmt.executeQuery("SELECT Order_ID, Total_Price, Time FROM customer_order ORDER BY Time ASC");
             while(rs.next()){
                 historyArea.append("Order " + rs.getInt("Order_ID") + ": $" + rs.getDouble("Total_Price") + " on " + rs.getTimestamp("Time") + "\n");
             }
