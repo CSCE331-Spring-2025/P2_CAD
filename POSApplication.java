@@ -1,69 +1,70 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.sql.*;
 import javax.swing.*;
 
 public class POSApplication extends JFrame implements ActionListener {
-    // Use CardLayout to manage different "pages"
+    // CardLayout to manage different "pages"
     private CardLayout cardLayout = new CardLayout();
     private JPanel cardPanel = new JPanel(cardLayout);
 
-    // Database credentials
+    // Database credentials using dbSetup
     private static final String DB_URL = "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db";
-    private static final String DB_USER = "team_cad";
-    private static final String DB_PASSWORD = "cad";
+    private static final String DB_USER = dbSetup.user;
+    private static final String DB_PASSWORD = dbSetup.pswd;
 
-    // Panel names for the CardLayout
+    // Panel names
     private final String MANAGER_PAGE = "Manager";
     private final String CASHIER_PAGE = "Cashier";
     private final String INVENTORY_PAGE = "Inventory";
+    private final String EMPLOYEE_PAGE = "Employees";
 
     public POSApplication() {
-        setTitle("POS System");
+        setTitle("POS System - Manager Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
-        setLocationRelativeTo(null); // Center the window
+        setLocationRelativeTo(null); // Center window
 
-        // Create the three pages (panels)
+        // Create pages
         JPanel managerPanel = createManagerPanel();
         JPanel cashierPanel = createCashierPanel();
         JPanel inventoryPanel = createInventoryPanel();
+        JPanel employeePanel = createEmployeePanel();
 
-        // Add panels to cardPanel with identifiers
+        // Add pages to cardPanel
         cardPanel.add(managerPanel, MANAGER_PAGE);
         cardPanel.add(cashierPanel, CASHIER_PAGE);
         cardPanel.add(inventoryPanel, INVENTORY_PAGE);
+        cardPanel.add(employeePanel, EMPLOYEE_PAGE);
 
-        // Add the card panel to the center of the frame
         add(cardPanel, BorderLayout.CENTER);
 
-        // Create a navigation panel with buttons at the bottom
+        // Navigation panel at the bottom
         JPanel navPanel = new JPanel();
         JButton btnManager = new JButton("Manager");
         JButton btnCashier = new JButton("Cashier");
         JButton btnInventory = new JButton("Inventory");
+        JButton btnEmployee = new JButton("Employees");
 
-        // Set action commands to match our card names
         btnManager.setActionCommand(MANAGER_PAGE);
         btnCashier.setActionCommand(CASHIER_PAGE);
         btnInventory.setActionCommand(INVENTORY_PAGE);
+        btnEmployee.setActionCommand(EMPLOYEE_PAGE);
 
-        // Register this class as the ActionListener
         btnManager.addActionListener(this);
         btnCashier.addActionListener(this);
         btnInventory.addActionListener(this);
+        btnEmployee.addActionListener(this);
 
-        // Add the buttons to the navigation panel
         navPanel.add(btnManager);
         navPanel.add(btnCashier);
         navPanel.add(btnInventory);
+        navPanel.add(btnEmployee);
 
-        // Add the navigation panel to the bottom of the frame
         add(navPanel, BorderLayout.SOUTH);
     }
 
-    // Manager panel (Displays Sales Trends)
+    // Manager panel: displays sales trends
     private JPanel createManagerPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Manager Page: Sales Trends", SwingConstants.CENTER);
@@ -93,7 +94,7 @@ public class POSApplication extends JFrame implements ActionListener {
         return panel;
     }
 
-    // Cashier panel (Displays Menu)
+    // Cashier panel: displays menu items
     private JPanel createCashierPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Cashier Page: Menu", SwingConstants.CENTER);
@@ -121,7 +122,7 @@ public class POSApplication extends JFrame implements ActionListener {
         return panel;
     }
 
-    // Inventory panel (Displays Inventory Items)
+    // Inventory panel: displays inventory items
     private JPanel createInventoryPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         JLabel label = new JLabel("Inventory Page", SwingConstants.CENTER);
@@ -148,17 +149,40 @@ public class POSApplication extends JFrame implements ActionListener {
         panel.add(new JScrollPane(inventoryArea), BorderLayout.CENTER);
         return panel;
     }
+    
+    // Employee management panel: displays employee information
+    private JPanel createEmployeePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JLabel label = new JLabel("Employee Management", SwingConstants.CENTER);
+        label.setFont(new Font("SansSerif", Font.BOLD, 24));
+        panel.add(label, BorderLayout.NORTH);
+        
+        JTextArea empArea = new JTextArea();
+        empArea.setEditable(false);
+        
+        try {
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT Employee_ID, Position FROM Employee");
+            while(rs.next()){
+                empArea.append("ID: " + rs.getInt("Employee_ID") + " - Position: " + rs.getString("Position") + "\n");
+            }
+            conn.close();
+        } catch(Exception e) {
+            empArea.setText("Error fetching employee data.");
+            e.printStackTrace();
+        }
+        
+        panel.add(new JScrollPane(empArea), BorderLayout.CENTER);
+        return panel;
+    }
 
-    // Handle navigation button clicks
     @Override
     public void actionPerformed(ActionEvent e) {
-        String command = e.getActionCommand();
-        cardLayout.show(cardPanel, command);
+        cardLayout.show(cardPanel, e.getActionCommand());
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new POSApplication().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new POSApplication().setVisible(true));
     }
 }
