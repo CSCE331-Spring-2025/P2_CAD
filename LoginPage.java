@@ -42,13 +42,13 @@ public class LoginPage extends JFrame {
         try {
              String dbUrl = "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db";
              Connection conn = DriverManager.getConnection(dbUrl, dbSetup.user, dbSetup.pswd);
-             String query = "SELECT * FROM employee WHERE employee_id = ?";
+             String query = "SELECT * FROM employee WHERE pin = ?";
              PreparedStatement stmt = conn.prepareStatement(query);
              stmt.setInt(1, employeeId);
              ResultSet rs = stmt.executeQuery();
              
              if (rs.next()) {
-                 int foundId = rs.getInt("employee_id");
+                 int foundId = rs.getInt("pin");
                  String pos = rs.getString("position");
                  // Debug print: Show the retrieved position enclosed in brackets.
                  System.out.println("Found employee: " + foundId + " with position [" + pos + "]");
