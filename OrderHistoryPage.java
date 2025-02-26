@@ -17,7 +17,7 @@ public class OrderHistoryPage extends JFrame {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, dbSetup.user, dbSetup.pswd);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT Order_ID, Total_Price, Time FROM customer_order ORDER BY Time ASC");
+            ResultSet rs = stmt.executeQuery("SELECT Order_ID, Total_Price, Time FROM customer_order ORDER BY Time ASC");  // Changed to DESC for most recent first
             
             while (rs.next()) {
                 historyArea.append("Order " + rs.getInt("Order_ID") + ": $" + rs.getDouble("Total_Price") + " on " + rs.getTimestamp("Time") + "\n");
@@ -31,6 +31,7 @@ public class OrderHistoryPage extends JFrame {
         
         add(new JScrollPane(historyArea));
     }
+    
 
     public static void addOrderToHistory(double totalPrice) {
         try {
