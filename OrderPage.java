@@ -121,11 +121,13 @@ public class OrderPage extends JFrame {
         
         // Save the order to the database and update history
         double totalPrice = selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
+        
+        // Add the order with timestamp to the OrderHistoryPage
         OrderHistoryPage.addOrderToHistory(totalPrice);
-
+    
         // Open the CheckoutPage with the current order summary
         CheckoutPage checkoutPage = new CheckoutPage(selectedItems, selectedPrices);
         checkoutPage.setVisible(true);
         this.dispose();
-    }
+    }    
 }

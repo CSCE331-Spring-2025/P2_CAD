@@ -66,5 +66,6 @@ public class CheckoutPage extends JFrame {
         // Here you can add logic to handle the payment process or redirect to another stage.
         JOptionPane.showMessageDialog(this, message);
         this.dispose(); // Close the checkout page after payment action
+        
     }
 }
