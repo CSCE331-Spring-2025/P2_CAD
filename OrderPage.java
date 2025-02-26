@@ -27,7 +27,7 @@ public class OrderPage extends JFrame {
         JScrollPane menuScroll = new JScrollPane(menuPanel);
         add(menuScroll, BorderLayout.CENTER);
 
-        // Right Side: Order Summary (Extended)
+        // Right Side: Order Summary
         JPanel orderPanel = new JPanel(new BorderLayout());
         orderPanel.setPreferredSize(new Dimension(300, 500));
 
@@ -119,6 +119,10 @@ public class OrderPage extends JFrame {
             return;
         }
         
+        // Save the order to the database and update history
+        double totalPrice = selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
+        OrderHistoryPage.addOrderToHistory(totalPrice);
+
         // Open the CheckoutPage with the current order summary
         CheckoutPage checkoutPage = new CheckoutPage(selectedItems, selectedPrices);
         checkoutPage.setVisible(true);

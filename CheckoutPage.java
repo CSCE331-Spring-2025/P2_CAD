@@ -7,8 +7,6 @@ public class CheckoutPage extends JFrame {
     private ArrayList<String> selectedItems;
     private ArrayList<Double> selectedPrices;
     private JLabel totalLabel;
-    private JRadioButton creditDebitButton;
-    private JRadioButton cashButton;
 
     public CheckoutPage(ArrayList<String> items, ArrayList<Double> prices) {
         this.selectedItems = items;
@@ -38,38 +36,31 @@ public class CheckoutPage extends JFrame {
         totalLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         add(totalLabel, BorderLayout.NORTH);
 
-        // Payment Method Selection
+        // Payment Method Buttons
         JPanel paymentPanel = new JPanel(new FlowLayout());
         paymentPanel.setBorder(BorderFactory.createTitledBorder("Select Payment Method"));
 
-        creditDebitButton = new JRadioButton("Credit/Debit Card");
-        cashButton = new JRadioButton("Cash");
+        // Pay with Credit/Debit Card Button
+        JButton creditDebitButton = new JButton("Pay with Credit/Debit Card");
+        creditDebitButton.setFont(new Font("SansSerif", Font.BOLD, 16));
+        creditDebitButton.addActionListener(e -> proceedToPayment("Credit/Debit Card"));
 
-        ButtonGroup paymentGroup = new ButtonGroup();
-        paymentGroup.add(creditDebitButton);
-        paymentGroup.add(cashButton);
+        // Pay with Cash Button
+        JButton cashButton = new JButton("Pay with Cash");
+        cashButton.setFont(new Font("SansSerif", Font.BOLD, 16));
+        cashButton.addActionListener(e -> proceedToPayment("Cash"));
 
         paymentPanel.add(creditDebitButton);
         paymentPanel.add(cashButton);
 
-        // Default to Credit/Debit Card selected
-        creditDebitButton.setSelected(true);
-
         add(paymentPanel, BorderLayout.SOUTH);
-
-        // Proceed to Payment Button
-        JButton proceedButton = new JButton("Proceed to Payment");
-        proceedButton.setFont(new Font("SansSerif", Font.BOLD, 16));
-        proceedButton.addActionListener(e -> proceedToPayment());
-        add(proceedButton, BorderLayout.PAGE_END);
     }
 
     private double calculateTotal() {
         return selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
     }
 
-    private void proceedToPayment() {
-        String paymentMethod = creditDebitButton.isSelected() ? "Credit/Debit Card" : "Cash";
+    private void proceedToPayment(String paymentMethod) {
         String message = "Proceeding with payment via " + paymentMethod;
 
         // Here you can add logic to handle the payment process or redirect to another stage.
