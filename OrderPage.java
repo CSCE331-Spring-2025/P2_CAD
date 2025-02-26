@@ -1,8 +1,7 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.*;
 import java.util.ArrayList;
+import javax.swing.*;
 
 public class OrderPage extends JFrame {
     private JPanel orderListPanel;
