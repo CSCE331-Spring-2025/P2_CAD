@@ -79,7 +79,7 @@ RETURNS TRIGGER AS $$
 BEGIN
     UPDATE customer_order
     SET Total_Price = (
-        SELECT COALESCE(SUM(mi.Price * cmj.Quantity), 0)  -- 주문이 없을 경우 NULL 방지
+        SELECT COALESCE(SUM(mi.Price * cmj.Quantity), 0)
         FROM C_M_Junction cmj
         JOIN Menu_Item mi ON cmj.Menu_ID = mi.Menu_ID
         WHERE cmj.Order_ID = NEW.Order_ID
@@ -94,3 +94,8 @@ CREATE TRIGGER trigger_update_total_price
 AFTER INSERT OR UPDATE OR DELETE ON C_M_Junction
 FOR EACH ROW EXECUTE FUNCTION update_total_price();
 
+-- reset serial of customer_order table
+SELECT setval(
+    pg_get_serial_sequence('customer_order', 'order_id'), 
+    (SELECT COALESCE(MAX(order_id), 1) FROM customer_order)
+);
