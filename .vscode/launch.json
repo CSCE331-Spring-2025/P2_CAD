@@ -1,0 +1,36 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "GUI",
+            "request": "launch",
+            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
+            "mainClass": "GUI",
+            "projectName": "P2_CAD_25d47d06"
+        },
+        {
+            "type": "java",
+            "name": "jdbcpostgreSQL",
+            "request": "launch",
+            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
+            "mainClass": "jdbcpostgreSQL",
+            "projectName": "P2_CAD_25d47d06"
+        },
+        {
+            "type": "java",
+            "name": "jdbcpostgreSQLGUI",
+            "request": "launch",
+            "vmArgs": "--module-path \"/Users/sareemmomin/Documents/TAMU/CSCE331/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml",
+            "mainClass": "jdbcpostgreSQLGUI",
+            "projectName": "P2_CAD_25d47d06"
+        }
+    ]
+}

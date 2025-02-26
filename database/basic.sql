@@ -94,6 +94,30 @@ CREATE TRIGGER trigger_update_total_price
 AFTER INSERT OR UPDATE OR DELETE ON C_M_Junction
 FOR EACH ROW EXECUTE FUNCTION update_total_price();
 
+
+CREATE OR REPLACE FUNCTION update_inventory_on_order()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Inventory
+    SET Current_Number = Current_Number - used.Quantity
+    FROM (
+        SELECT MIJ.Inventory_ID, CMJ.Quantity 
+        FROM C_M_Junction CMJ
+        JOIN M_I_Junction MIJ ON CMJ.Menu_ID = MIJ.Menu_ID
+        WHERE CMJ.Order_ID = NEW.Order_ID
+    ) AS used
+    WHERE Inventory.Inventory_ID = used.Inventory_ID;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reduce_inventory_trigger
+AFTER INSERT ON C_M_Junction
+FOR EACH ROW
+EXECUTE FUNCTION update_inventory_on_order();
+
+
 -- reset serial of customer_order table
 SELECT setval(
     pg_get_serial_sequence('customer_order', 'order_id'), 

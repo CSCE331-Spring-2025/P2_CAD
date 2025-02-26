@@ -29,15 +29,15 @@ The interface should support two groups of users: cashiers/customers and manager
 # page 1 : order (manager & cashier)
 
 - left panel
-    -- Retrieve menu information (menu name, price, etc.)
-    -- Customization? (Milk, flavor, additional notes, etc.)
+    - Retrieve menu information (menu name, price, etc.)
+    - Customization? (Milk, flavor, additional notes, etc.)
 
 - right panel
-    -- insert new row into customer_order table
-    -- need to show
-        -- Items in the order
-        -- current total price
-        -- ??
+    - insert new row into customer_order table
+    - need to show
+        - Items in the order
+        - current total price
+        - ??
 
 - payment page? 
     - get order info from previous page (pass the pk of customer_order?)
