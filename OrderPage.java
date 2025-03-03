@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.*;
 
 public class OrderPage extends JFrame {
@@ -121,8 +123,27 @@ public class OrderPage extends JFrame {
         // Save the order to the database and update history
         double totalPrice = selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
         
-        // Add the order with timestamp to the OrderHistoryPage
-        OrderHistoryPage.addOrderToHistory(totalPrice);
+        // Add the order with timestamp to the OrderHistoryPage and get the orde id
+        int orderId = OrderHistoryPage.addOrderToHistory(totalPrice);
+
+        // count quantity of each item
+        Map<String, Integer> itemCount = new HashMap<>();
+        for (String item : selectedItems) {
+            itemCount.put(item, itemCount.getOrDefault(item, 0) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
+            String itemName = entry.getKey();
+            int quantity = entry.getValue();
+            
+            int menuId = OrderHistoryPage.getMenuIdFromName(itemName);
+            if (menuId != -1) {
+                OrderHistoryPage.addMenuItemToOrder(orderId, menuId, quantity);
+            } else {
+                System.out.println("Error: Menu ID not found for item " + itemName);
+            }
+        }
+    
     
         // Open the CheckoutPage with the current order summary
         CheckoutPage checkoutPage = new CheckoutPage(selectedItems, selectedPrices);
