@@ -168,7 +168,7 @@ public class CashierDashboard extends JFrame {
             
             java.sql.Statement stmt = conn.createStatement();
             java.sql.ResultSet rs = stmt.executeQuery(
-                "SELECT Order_ID, Total_Price, Time FROM customer_order ORDER BY Time DESC"
+                "SELECT Order_ID, Total_Price, Time FROM customer_order ORDER BY Time ASC"
             );
             
             // Format the data
