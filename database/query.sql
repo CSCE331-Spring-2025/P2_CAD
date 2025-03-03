@@ -110,3 +110,11 @@ JOIN customer_order co ON c.Order_ID = co.Order_ID
 GROUP BY c.Customer_ID
 ORDER BY total_spent DESC
 LIMIT 10;
+-- links the prices so its not random and its the actual values of the order items
+UPDATE customer_order co
+SET total_price = (
+    SELECT SUM(m.price)
+    FROM c_m_junction cmj
+    JOIN menu_item m ON cmj.menu_id = m.menu_id
+    WHERE cmj.order_id = co.order_id
+);

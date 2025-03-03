@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+=======
+import java.awt.*;
+import java.util.ArrayList;
+import javax.swing.*;
+>>>>>>> 3ee16eb115934b8365a45ed416cc1bd00e3890a0
 
 public class CheckoutPage extends JFrame {
     private ArrayList<String> selectedItems;
@@ -66,5 +72,9 @@ public class CheckoutPage extends JFrame {
         // Here you can add logic to handle the payment process or redirect to another stage.
         JOptionPane.showMessageDialog(this, message);
         this.dispose(); // Close the checkout page after payment action
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 3ee16eb115934b8365a45ed416cc1bd00e3890a0
     }
 }
