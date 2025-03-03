@@ -1,8 +1,19 @@
+
 import java.awt.*;
 import java.sql.*;
 import javax.swing.*;
 
 public class LoginPage extends JFrame {
+    /**
+     * Database Setup class for configuring database connection parameters.
+     * This class provides constants for database user credentials.
+     *
+     * @author Sareem, Rayan, Chloe, Chase
+     * @param  name  the name of the database
+     * @return the login page
+     * @throws MalformedURLException  if the user login is not correct
+     * @see    login pin page
+     */
     private JTextField pinField;
     private JButton loginButton;
 
@@ -26,6 +37,7 @@ public class LoginPage extends JFrame {
         setLocationRelativeTo(null);
     }
     
+    @SuppressWarnings("ConvertToTryWithResources")
     private void authenticate() {
         // Get the PIN input and trim any extra whitespace.
         String pin = pinField.getText().trim();
@@ -41,7 +53,7 @@ public class LoginPage extends JFrame {
         
         try {
              String dbUrl = "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db";
-             Connection conn = DriverManager.getConnection(dbUrl, dbSetup.user, dbSetup.pswd);
+             Connection conn = DriverManager.getConnection(dbUrl, "team_cad", "cad");
              String query = "SELECT * FROM employee WHERE pin = ?";
              PreparedStatement stmt = conn.prepareStatement(query);
              stmt.setInt(1, employeeId);
@@ -75,5 +87,25 @@ public class LoginPage extends JFrame {
     
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LoginPage().setVisible(true));
+    }
+
+    private static class POSApplication {
+
+        public POSApplication() {
+        }
+
+        private void setVisible(boolean b) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    private static class CashierDashboard {
+
+        public CashierDashboard() {
+        }
+
+        private void setVisible(boolean b) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 }
