@@ -1,10 +1,15 @@
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
-<<<<<<< HEAD
-=======
-import javax.swing.*;
->>>>>>> 3ee16eb115934b8365a45ed416cc1bd00e3890a0
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 public class OrderPage extends JFrame {
     private JPanel orderListPanel;
@@ -34,7 +39,7 @@ public class OrderPage extends JFrame {
         orderPanel.setPreferredSize(new Dimension(300, 500));
 
         orderListPanel = new JPanel();
-        orderListPanel.setLayout(new BoxLayout(orderListPanel, BoxLayout.Y_AXIS));
+        orderListPanel.setLayout((LayoutManager) new BoxLayout(orderListPanel, BoxLayout.Y_AXIS));
 
         JScrollPane orderScroll = new JScrollPane(orderListPanel);
         orderScroll.setPreferredSize(new Dimension(300, 350));
