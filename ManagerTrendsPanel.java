@@ -481,11 +481,26 @@ public class ManagerTrendsPanel extends JPanel {
     private void generateZReport() {
         // 1) Total Sales for the Day
         double totalSales = 0.0;
+        int totalOrders = 0;
+        
+        // Query for total sales
         String queryTotalSales =
-            "SELECT SUM(Total_Price) AS sales " +
-            "FROM customer_order " +
-            "WHERE DATE(Time) = CURRENT_DATE";
-
+            "SELECT SUM(Total_Price) AS sales FROM customer_order WHERE DATE(Time) = CURRENT_DATE";
+        totalSales = runQueryForTotalSales(queryTotalSales);
+    
+        // Query for total orders
+        String queryTotalOrders =
+            "SELECT COUNT(*) AS orders FROM customer_order WHERE DATE(Time) = CURRENT_DATE";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(queryTotalOrders)) {
+            if (rs.next()) {
+                totalOrders = rs.getInt("orders");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    
         // 2) All menu items sold today (from greatest to least)
         DefaultTableModel topMenuItemModel = new DefaultTableModel(new String[]{"Menu Item", "Sold Count"}, 0);
         String queryTopMenuToday =
@@ -497,7 +512,7 @@ public class ManagerTrendsPanel extends JPanel {
             "GROUP BY m.name " +
             "ORDER BY cnt DESC";
         runQueryToTable(queryTopMenuToday, topMenuItemModel);
-
+    
         // 3) All inventory items used (today)
         DefaultTableModel inventoryUsedModel = new DefaultTableModel(new String[]{"Inventory Item", "Used Count"}, 0);
         String queryInventoryUsedToday =
@@ -511,28 +526,56 @@ public class ManagerTrendsPanel extends JPanel {
             "GROUP BY i.name " +
             "ORDER BY used_count DESC";
         runQueryToTable(queryInventoryUsedToday, inventoryUsedModel);
-
-        totalSales = runQueryForTotalSales(queryTotalSales);
-
+    
+        // Calculate tax at 8.25%
+        double tax = totalSales * 0.0825;
+    
+        // Build the Z-Report panel
         JPanel zPanel = new JPanel();
         zPanel.setLayout(new BoxLayout(zPanel, BoxLayout.Y_AXIS));
-
-        zPanel.add(new JLabel("Z-Report (End of Day)"));
-        zPanel.add(new JLabel("Total Sales (Today): $" + String.format("%.2f", totalSales)));
-
-        zPanel.add(new JLabel("All Menu Items Sold Today (Greatest to Least):"));
+    
+        // "Z-Report (End of Day)" label, left-aligned
+        JLabel zReportLabel = new JLabel("Z-Report (End of Day)");
+        zReportLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        zReportLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(zReportLabel);
+    
+        // Show total orders, total sales, and tax in a big label, left-aligned
+        Font bigFont = new Font("SansSerif", Font.BOLD, 16);
+        JLabel summaryLabel = new JLabel(
+            "Orders: " + totalOrders +
+            "   |   Total Cash: $" + String.format("%.2f", totalSales) +
+            "   |   Tax (8.25%): $" + String.format("%.2f", tax)
+        );
+        summaryLabel.setFont(bigFont);
+        summaryLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        summaryLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(summaryLabel);
+    
+        // Label for "All Menu Items Sold Today", left-aligned
+        JLabel menuItemsLabel = new JLabel("All Menu Items Sold Today (Greatest to Least):");
+        menuItemsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        menuItemsLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(menuItemsLabel);
+    
         JTable topMenuTable = new JTable(topMenuItemModel);
         zPanel.add(new JScrollPane(topMenuTable));
-
-        zPanel.add(new JLabel("All Inventory Items Used (Today):"));
+    
+        // Label for "All Inventory Items Used (Today):", left-aligned
+        JLabel invUsedLabel = new JLabel("All Inventory Items Used (Today):");
+        invUsedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        invUsedLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(invUsedLabel);
+    
         JTable invUsedTable = new JTable(inventoryUsedModel);
         zPanel.add(new JScrollPane(invUsedTable));
-
+    
         JScrollPane scrollPane = new JScrollPane(zPanel);
         scrollPane.setPreferredSize(new Dimension(700, 500));
-
+    
         JOptionPane.showMessageDialog(this, scrollPane, "Z-Report (End of Day)", JOptionPane.INFORMATION_MESSAGE);
     }
+    
 
     // ------------------ Helper Methods ------------------
     private void runQueryToTable(String query, DefaultTableModel model) {
