@@ -7,8 +7,14 @@ public class EmployeeManagementPanel extends JPanel {
     private JTable employeeTable;
     private DefaultTableModel tableModel;
     private JButton addButton, updateButton, deleteButton;
+    
+    // Colors:
+    private static final Color MAIN_BG_COLOR = new Color(0xFFC364); // #ffc364 (soft orange)
+    private static final Color BUTTON_PANEL_COLOR = new Color(0xFDFDFD); // Soft white
 
     public EmployeeManagementPanel() {
+        // Keep the main panel background #ffc364
+        setBackground(new Color(255, 195, 100)); // Set background to #ffc364
         setLayout(new BorderLayout());
         
         // Define table columns: Employee ID, First Name, Last Name, Position, PIN
@@ -23,13 +29,24 @@ public class EmployeeManagementPanel extends JPanel {
         };
         
         employeeTable = new JTable(tableModel);
+        employeeTable.setBackground(new Color(0xFFC364));
+        employeeTable.setOpaque(true);
+        employeeTable.setForeground(Color.BLACK); // black text for contrast
         loadEmployeeData();
-        
+
+        // Make the scroll pane background match the main panel
         JScrollPane scrollPane = new JScrollPane(employeeTable);
+        scrollPane.setBackground(MAIN_BG_COLOR);
+        scrollPane.getViewport().setBackground(Color.WHITE); 
+        // The table cells remain white; behind them is white. 
+        // The border area of the scroll pane uses MAIN_BG_COLOR.
+
         add(scrollPane, BorderLayout.CENTER);
         
-        // Button panel for add, update, delete actions
+        // Button panel for add, update, delete actions, set to soft white
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(BUTTON_PANEL_COLOR);
+        
         addButton = new JButton("Add Employee");
         updateButton = new JButton("Update Selected Employee");
         deleteButton = new JButton("Delete Selected Employee");
@@ -97,7 +114,7 @@ public class EmployeeManagementPanel extends JPanel {
         JTextField firstNameField = new JTextField();
         JTextField lastNameField = new JTextField();
         JTextField positionField = new JTextField();
-        JTextField pinField = new JTextField();  // NEW: PIN field
+        JTextField pinField = new JTextField();  // PIN field
         
         Object[] message = {
             "First Name:", firstNameField,
@@ -172,7 +189,7 @@ public class EmployeeManagementPanel extends JPanel {
         JTextField firstNameField = new JTextField(currentFirstName);
         JTextField lastNameField = new JTextField(currentLastName);
         JTextField positionField = new JTextField(currentPosition);
-        JTextField pinField = new JTextField(String.valueOf(currentPin)); // NEW: PIN field with current value
+        JTextField pinField = new JTextField(String.valueOf(currentPin)); // PIN field with current value
         
         Object[] message = {
             "First Name:", firstNameField,
@@ -259,6 +276,11 @@ public class EmployeeManagementPanel extends JPanel {
             JFrame frame = new JFrame("Employee Management Test");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 400);
+            
+            // We want the rest of the app to remain #ffc364, so let's do:
+            frame.getContentPane().setBackground(new Color(0xFFC364));
+            
+            // Then add the panel, which is also #ffc364 except for the bottom
             frame.add(new EmployeeManagementPanel());
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

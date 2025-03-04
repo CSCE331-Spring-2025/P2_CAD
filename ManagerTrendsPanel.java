@@ -13,6 +13,7 @@ public class ManagerTrendsPanel extends JPanel {
     public ManagerTrendsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBackground(new Color(255, 195, 100)); // Set background to #ffc364
 
         // 1. Total revenue label at the top (for the past 39 weeks)
         double totalRevenue = getTotalRevenue();
@@ -24,7 +25,7 @@ public class ManagerTrendsPanel extends JPanel {
 
         // 2. Best Days of the Week Panel (X-Report)
         JPanel dowPanel = new JPanel(new BorderLayout());
-        dowPanel.setBorder(new TitledBorder("Best Days of the Week (Past 39 Weeks) [X-Report]"));
+        dowPanel.setBorder(new TitledBorder("Best Days of the Week (Past 39 Weeks)"));
         dowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         JTable dowTable = new JTable();
         DefaultTableModel dowModel = new DefaultTableModel(new String[]{"Day", "Revenue"}, 0);
@@ -54,7 +55,7 @@ public class ManagerTrendsPanel extends JPanel {
 
         // 4. Top 25 Best Days Overall Panel (Z-Report)
         JPanel bestDaysPanel = new JPanel(new BorderLayout());
-        bestDaysPanel.setBorder(new TitledBorder("Top 25 Best Days (Overall) [Z-Report]"));
+        bestDaysPanel.setBorder(new TitledBorder("Top 25 Best Days (Overall)"));
         bestDaysPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         JTable bestDaysTable = new JTable();
         DefaultTableModel bestDaysModel = new DefaultTableModel(new String[]{"Date", "Revenue"}, 0);
@@ -78,8 +79,29 @@ public class ManagerTrendsPanel extends JPanel {
         buttonPanel.add(xReportButton);
 
         JButton zReportButton = new JButton("Z-Report (End of Day)");
-        zReportButton.addActionListener(e -> generateZReport());
+        zReportButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "<html><b>Reminder:</b> The Z-Report should only be run at the end of the business day.<br>" +
+                "Running this report will finalize today's sales, reset totals for tomorrow, and cannot be undone.<br><br>" +
+                "<b>This report includes:</b><br>" +
+                "✅ Sales and tax information<br>" +
+                "✅ Payment methods summary<br>" +
+                "✅ Total cash collected<br>" +
+                "✅ Discounts, voids, and service charges<br>" +
+                "✅ Employee signatures for accountability<br><br>" +
+                "<b>Are you sure you want to proceed?</b>",
+                "Confirm End-of-Day Z-Report",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            );
+        
+            if (confirm == JOptionPane.YES_OPTION) {
+                generateZReport(); // Only runs if the user confirms
+            }
+        });
         buttonPanel.add(zReportButton);
+        
 
         buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(buttonPanel);
@@ -94,6 +116,7 @@ public class ManagerTrendsPanel extends JPanel {
     // ------------------ Helper Methods ------------------
 
     private double getTotalRevenue() {
+        
         double revenue = 0.0;
         String query = "SELECT SUM(Total_Price) AS total_revenue FROM customer_order " +
                        "WHERE Time >= CURRENT_DATE - INTERVAL '39 weeks'";
@@ -408,22 +431,22 @@ public class ManagerTrendsPanel extends JPanel {
         // 1) Sales per hour
         DefaultTableModel hourSalesModel = new DefaultTableModel(new String[]{"Hour", "Total Sales"}, 0);
         String querySalesPerHour =
-            "SELECT EXTRACT(HOUR FROM Time) AS hr, SUM(Total_Price) AS sales " +
+            "SELECT TO_CHAR(DATE_TRUNC('hour', Time), 'FMHH12 AM') AS hr, SUM(Total_Price) AS sales " +
             "FROM customer_order " +
             "WHERE DATE(Time) = CURRENT_DATE " +
-            "GROUP BY hr " +
-            "ORDER BY hr";
+            "GROUP BY DATE_TRUNC('hour', Time) " +
+            "ORDER BY DATE_TRUNC('hour', Time)";
         runQueryToTable(querySalesPerHour, hourSalesModel);
 
         // 2) Number of menu items ordered per hour
         DefaultTableModel hourItemsModel = new DefaultTableModel(new String[]{"Hour", "Items Ordered"}, 0);
         String queryItemsPerHour =
-            "SELECT EXTRACT(HOUR FROM co.Time) AS hr, COUNT(*) AS items_ordered " +
+            "SELECT TO_CHAR(DATE_TRUNC('hour', co.Time), 'FMHH12 AM') AS hr, COUNT(*) AS items_ordered " +
             "FROM C_M_Junction cmj " +
             "JOIN customer_order co ON co.Order_ID = cmj.Order_ID " +
             "WHERE DATE(co.Time) = CURRENT_DATE " +
-            "GROUP BY hr " +
-            "ORDER BY hr";
+            "GROUP BY DATE_TRUNC('hour', co.Time) " +
+            "ORDER BY DATE_TRUNC('hour', co.Time)";
         runQueryToTable(queryItemsPerHour, hourItemsModel);
 
         // 3) All menu items sold today (from greatest to least)
