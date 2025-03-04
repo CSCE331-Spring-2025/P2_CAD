@@ -2,17 +2,21 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MenuPanel extends JPanel {
     private JTable menuTable;
     private DefaultTableModel tableModel;
-    private JButton addButton, updateButton, deleteButton;
+    private JButton addButton, updateButton, deleteButton, toggleSeasonalButton;
+
+    private Map<String, SeasonalItem> seasonalItems;
 
     public MenuPanel() {
         setLayout(new BorderLayout());
 
         // Define table columns: ID, Name, Price
-        String[] columnNames = { "ID", "Name", "Price" };
+        String[] columnNames = { "ID", "Name", "Price", "Seasonal" };
 
         // Create table model (non-editable cells by default)
         tableModel = new DefaultTableModel(columnNames, 0) {
@@ -33,15 +37,100 @@ public class MenuPanel extends JPanel {
         addButton = new JButton("Add Menu Item");
         updateButton = new JButton("Update Selected Item");
         deleteButton = new JButton("Delete Selected Item");
+        toggleSeasonalButton = new JButton("Add Seasonal Items");
 
         addButton.addActionListener(e -> addMenuItem());
         updateButton.addActionListener(e -> updateSelectedItem());
         deleteButton.addActionListener(e -> deleteSelectedItem());
+        toggleSeasonalButton.addActionListener(e -> toggleSeasonalItems());
 
         buttonPanel.add(addButton);
         buttonPanel.add(updateButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(toggleSeasonalButton);
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    // Inner class to represent Seasonal Items
+    private class SeasonalItem {
+        int id;
+        String name;
+        double price;
+        String season;
+    
+        SeasonalItem(int id, String name, double price, String season) {
+            this.id = id;
+            this.name = name;
+            this.price = price;
+            this.season = season;
+        }
+    }
+
+    private void toggleSeasonalItems() {
+        // Define seasonal items
+        SeasonalItem[] seasonalMenu = {
+            new SeasonalItem(getNextMenuId(), "Spring Blossom Salad", 12.99, "Spring"),
+            new SeasonalItem(getNextMenuId(), "Summer Sunset Smoothie", 5.99, "Summer"),
+            new SeasonalItem(getNextMenuId(), "Autumn Harvest Soup", 8.99, "Autumn"),
+            new SeasonalItem(getNextMenuId(), "Winter Comfort Stew", 14.99, "Winter")
+        };
+
+        // Toggle seasonal items
+        for (SeasonalItem item : seasonalMenu) {
+            if (!seasonalItems.containsKey(item.name)) {
+                // Add seasonal item to database and menu
+                addSeasonalItemToDatabase(item);
+                seasonalItems.put(item.name, item);
+                toggleSeasonalButton.setText("Remove Seasonal Items");
+            } else {
+                // Remove seasonal item from database and menu
+                removeSeasonalItemFromDatabase(item);
+                seasonalItems.remove(item.name);
+                toggleSeasonalButton.setText("Add Seasonal Items");
+            }
+        }
+
+        // Reload menu data to reflect changes
+        loadMenuData();
+    }
+
+    private void addSeasonalItemToDatabase(SeasonalItem item) {
+        try {
+            Connection conn = DriverManager.getConnection(
+                "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
+                dbSetup.user,
+                dbSetup.pswd
+            );
+            String query = "INSERT INTO Menu_Item (menu_id, name, price, seasonal) VALUES (?, ?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, item.id);
+            pstmt.setString(2, item.name);
+            pstmt.setDouble(3, item.price);
+            pstmt.setBoolean(4, true);
+            pstmt.executeUpdate();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error adding seasonal menu item.");
+        }
+    }
+
+    private void removeSeasonalItemFromDatabase(SeasonalItem item) {
+        try {
+            Connection conn = DriverManager.getConnection(
+                "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
+                dbSetup.user,
+                dbSetup.pswd
+            );
+            String query = "DELETE FROM Menu_Item WHERE menu_id = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setInt(1, item.id);
+            pstmt.executeUpdate();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error removing seasonal menu item.");
+        }
     }
 
     private void loadMenuData() {
@@ -54,14 +143,18 @@ public class MenuPanel extends JPanel {
                 dbSetup.pswd
             );
             Statement stmt = conn.createStatement();
-            // Assuming your Menu_Item table has columns: menu_id, name, price
-            ResultSet rs = stmt.executeQuery("SELECT menu_id, name, price FROM Menu_Item ORDER BY menu_id");
+            // Updated query to include seasonal flag
+            ResultSet rs = stmt.executeQuery(
+                "SELECT menu_id, name, price, COALESCE(seasonal, false) AS seasonal " +
+                "FROM Menu_Item ORDER BY menu_id"
+            );
 
             while (rs.next()) {
                 int id = rs.getInt("menu_id");
                 String name = rs.getString("name");
                 double price = rs.getDouble("price");
-                Object[] rowData = { id, name, price };
+                boolean isSeasonal = rs.getBoolean("seasonal");
+                Object[] rowData = { id, name, price, isSeasonal };
                 tableModel.addRow(rowData);
             }
             conn.close();
