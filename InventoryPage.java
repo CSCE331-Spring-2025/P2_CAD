@@ -56,13 +56,14 @@ public class InventoryPage extends JPanel {
             );
             Statement stmt = conn.createStatement();
             // Query includes the category column
-            ResultSet rs = stmt.executeQuery("SELECT inventory_id, name, category, current_number FROM inventory");
+            ResultSet rs = stmt.executeQuery("SELECT inventory_id, name, category, current_number, seasonal FROM inventory ORDER BY inventory_id ASC");
 
             while (rs.next()) {
                 int id = rs.getInt("inventory_id");
                 String name = rs.getString("name");
                 String category = rs.getString("category");
                 int currentStock = rs.getInt("current_number");
+                boolean seasonal = rs.getBoolean("seasonal");
 
                 Object[] rowData = { id, name, category, currentStock };
                 tableModel.addRow(rowData);
