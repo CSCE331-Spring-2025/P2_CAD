@@ -54,6 +54,24 @@ CREATE TABLE M_I_Junction (
 );
 
 
+
+/* Updates teh inventory and provide a suggestion for the manager*/
+UPDATE inventory i
+SET inventory_suggestion = COALESCE(s.suggested_amount, 0)
+FROM (
+    SELECT 
+        mij.inventory_id,
+        CASE 
+            WHEN SUM(co.total_price) < 10 THEN SUM(co.total_price) * 1
+            WHEN SUM(co.total_price) < 100 THEN SUM(co.total_price) * 2
+            ELSE SUM(co.total_price) * 3
+        END AS suggested_amount
+    FROM customer_order co
+    JOIN menu_item mi ON co.order_id = mi.menu_id  -- Link orders to menu items
+    JOIN m_i_junction mij ON mi.menu_id = mij.menu_id  -- Map menu items to inventory
+    GROUP BY mij.inventory_id
+) s
+WHERE i.inventory_id = s.inventory_id;
 /* 
 -- Delete the tables
 -- try several times
