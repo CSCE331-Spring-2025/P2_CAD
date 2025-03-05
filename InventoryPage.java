@@ -10,6 +10,9 @@ public class InventoryPage extends JPanel {
 
     public InventoryPage() {
         setLayout(new BorderLayout());
+        
+        // Add background color to the main panel (orange: #ffc364)
+        setBackground(new Color(0xFFC364));
 
         // Table column names: ID, Name, Category, Current Stock, Suggestion
         String[] columnNames = { "ID", "Name", "Category", "Current Stock", "Suggestion" };
@@ -23,13 +26,22 @@ public class InventoryPage extends JPanel {
         };
 
         inventoryTable = new JTable(tableModel);
+        
+        // Optional: Style the table header colors
+        inventoryTable.getTableHeader().setBackground(new Color(0xFF8C00)); // Dark orange
+        inventoryTable.getTableHeader().setForeground(Color.WHITE);
+
         loadInventoryData(); // Populate data from the database
 
         JScrollPane scrollPane = new JScrollPane(inventoryTable);
+        // Set the viewport background to the same orange for consistency
+        scrollPane.getViewport().setBackground(new Color(0xFFC364));
         add(scrollPane, BorderLayout.CENTER);
 
         // Panel for action buttons
         JPanel buttonPanel = new JPanel();
+        // Set the button panel background to the same orange
+        buttonPanel.setBackground(new Color(0xFFC364));
         addButton = new JButton("Add Inventory Item");
         deleteButton = new JButton("Delete Selected Item");
         updateButton = new JButton("Update Selected Item");
@@ -239,6 +251,7 @@ public class InventoryPage extends JPanel {
             JFrame frame = new JFrame("Inventory Management Test");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 400);
+            frame.getContentPane().setBackground(new Color(0xFFC364)); // Frame background in orange
             frame.add(new InventoryPage());
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

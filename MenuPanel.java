@@ -10,6 +10,8 @@ public class MenuPanel extends JPanel {
     
     public MenuPanel() {
         setLayout(new BorderLayout());
+        // Set the main panel background to orange (#ffc364)
+        setBackground(new Color(0xFFC364));
 
         // Define table columns: ID, Name, Price, Seasonal
         String[] columnNames = { "ID", "Name", "Price", "Seasonal" };
@@ -22,14 +24,24 @@ public class MenuPanel extends JPanel {
             }
         };
         menuTable = new JTable(tableModel);
-
+        // Set table cell background and text colors for readability
+        menuTable.setBackground(Color.WHITE);
+        menuTable.setForeground(Color.BLACK);
+        // Style the table header with dark orange background and white text
+        menuTable.getTableHeader().setBackground(new Color(0xFF8C00));
+        menuTable.getTableHeader().setForeground(Color.WHITE);
+        
         loadMenuData();
 
         JScrollPane scrollPane = new JScrollPane(menuTable);
+        // Set the viewport background to match the orange theme
+        scrollPane.getViewport().setBackground(new Color(0xFFC364));
         add(scrollPane, BorderLayout.CENTER);
 
-        // Panel for buttons (removed seasonal toggle button)
+        // Panel for buttons
         JPanel buttonPanel = new JPanel();
+        // Set button panel background to orange (#ffc364)
+        buttonPanel.setBackground(new Color(0xFFC364));
         addButton = new JButton("Add Menu Item");
         updateButton = new JButton("Update Selected Item");
         deleteButton = new JButton("Delete Selected Item");
@@ -244,6 +256,8 @@ public class MenuPanel extends JPanel {
             JFrame frame = new JFrame("Menu Management Test");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 400);
+            // Set frame background to the orange color
+            frame.getContentPane().setBackground(new Color(0xFFC364));
             frame.add(new MenuPanel());
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

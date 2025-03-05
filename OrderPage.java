@@ -3,16 +3,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 public class OrderPage extends JFrame {
     private JPanel orderListPanel;
@@ -28,24 +19,36 @@ public class OrderPage extends JFrame {
         setSize(900, 500);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        
+        // Set frame content background to soft orange (#FFC364)
+        getContentPane().setBackground(new Color(0xFFC364));
 
         selectedItems = new ArrayList<>();
         selectedPrices = new ArrayList<>();
 
-        // Left Side: Menu Items
+        // Left Side: Menu Items Panel
         JPanel menuPanel = new JPanel(new GridLayout(0, 2, 10, 10));
+        // Set menu panel background to soft orange
+        menuPanel.setBackground(new Color(0xFFC364));
         JScrollPane menuScroll = new JScrollPane(menuPanel);
+        menuScroll.getViewport().setBackground(new Color(0xFFC364));
         add(menuScroll, BorderLayout.CENTER);
 
-        // Right Side: Order Summary
+        // Right Side: Order Summary Panel
         JPanel orderPanel = new JPanel(new BorderLayout());
         orderPanel.setPreferredSize(new Dimension(300, 500));
+        // Set order panel background to soft orange
+        orderPanel.setBackground(new Color(0xFFC364));
 
         orderListPanel = new JPanel();
-        orderListPanel.setLayout((LayoutManager) new BoxLayout(orderListPanel, BoxLayout.Y_AXIS));
+        orderListPanel.setLayout(new BoxLayout(orderListPanel, BoxLayout.Y_AXIS));
+        // Keep order list panel white for clarity
+        orderListPanel.setBackground(Color.WHITE);
 
         JScrollPane orderScroll = new JScrollPane(orderListPanel);
         orderScroll.setPreferredSize(new Dimension(300, 350));
+        // Keep the viewport white so table cells remain clear
+        orderScroll.getViewport().setBackground(Color.WHITE);
         orderPanel.add(orderScroll, BorderLayout.CENTER);
 
         // Total Price Label
@@ -54,9 +57,11 @@ public class OrderPage extends JFrame {
         totalLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         orderPanel.add(totalLabel, BorderLayout.NORTH);
 
-        // Checkout Button
+        // Checkout Button with light orange background
         JButton btnCheckout = new JButton("Checkout to Payment");
         btnCheckout.setFont(new Font("SansSerif", Font.BOLD, 16));
+        btnCheckout.setBackground(new Color(0xFFCC80)); // Lighter orange
+        btnCheckout.setForeground(Color.BLACK);
         btnCheckout.addActionListener(e -> checkoutOrder());
         orderPanel.add(btnCheckout, BorderLayout.SOUTH);
 
@@ -73,6 +78,9 @@ public class OrderPage extends JFrame {
                 double itemPrice = rs.getDouble("Price");
 
                 JButton itemButton = new JButton(itemName + " - $" + itemPrice);
+                // Set menu item button background to a light orange and text to black
+                itemButton.setBackground(new Color(0xFFCC80));
+                itemButton.setForeground(Color.BLACK);
                 itemButton.setHorizontalTextPosition(SwingConstants.CENTER);
 
                 itemButton.addActionListener(e -> addItemToOrder(itemName, itemPrice));
@@ -90,10 +98,13 @@ public class OrderPage extends JFrame {
         selectedPrices.add(price);
 
         JPanel itemPanel = new JPanel(new BorderLayout());
+        // Optional: Set background for the item panel if desired
+        itemPanel.setBackground(Color.WHITE);
         JLabel itemLabel = new JLabel(itemName + " - $" + price);
         itemLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        // Only show the "X" button if an employee is logged in
+        // Only show the "X" button if an employee is logged in.
+        // DO NOT change styling for the remove button.
         if (isEmployee) {
             JButton removeButton = new JButton("X");
             removeButton.setPreferredSize(new Dimension(30, 30));
@@ -132,10 +143,10 @@ public class OrderPage extends JFrame {
         // Save the order to the database and update history
         double totalPrice = selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
         
-        // Add the order with timestamp to the OrderHistoryPage and get the orde id
+        // Add the order with timestamp to the OrderHistoryPage and get the order id
         int orderId = OrderHistoryPage.addOrderToHistory(totalPrice);
 
-        // count quantity of each item
+        // Count quantity of each item
         Map<String, Integer> itemCount = new HashMap<>();
         for (String item : selectedItems) {
             itemCount.put(item, itemCount.getOrDefault(item, 0) + 1);
@@ -153,10 +164,9 @@ public class OrderPage extends JFrame {
             }
         }
     
-    
         // Open the CheckoutPage with the current order summary
         CheckoutPage checkoutPage = new CheckoutPage(selectedItems, selectedPrices);
         checkoutPage.setVisible(true);
         this.dispose();
-    }    
+    }
 }

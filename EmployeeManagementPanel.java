@@ -9,18 +9,18 @@ public class EmployeeManagementPanel extends JPanel {
     private JButton addButton, updateButton, deleteButton;
     
     // Colors:
-    private static final Color MAIN_BG_COLOR = new Color(0xFFC364); // #ffc364 (soft orange)
+    private static final Color MAIN_BG_COLOR = new Color(0xFFC364); // Soft orange (#ffc364)
     private static final Color BUTTON_PANEL_COLOR = new Color(0xFDFDFD); // Soft white
 
     public EmployeeManagementPanel() {
-        // Keep the main panel background #ffc364
-        setBackground(new Color(255, 195, 100)); // Set background to #ffc364
+        // Set the main panel background to soft orange
+        setBackground(MAIN_BG_COLOR);
         setLayout(new BorderLayout());
         
         // Define table columns: Employee ID, First Name, Last Name, Position, PIN
         String[] columnNames = { "Employee ID", "First Name", "Last Name", "Position", "PIN" };
         
-        // Create table model; all cells are non-editable (use dialogs for editing)
+        // Create table model; all cells are non-editable
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -29,21 +29,21 @@ public class EmployeeManagementPanel extends JPanel {
         };
         
         employeeTable = new JTable(tableModel);
-        employeeTable.setBackground(new Color(0xFFC364));
-        employeeTable.setOpaque(true);
-        employeeTable.setForeground(Color.BLACK); // black text for contrast
+        // Set table cell background to white and text to black for readability
+        employeeTable.setBackground(Color.WHITE);
+        employeeTable.setForeground(Color.BLACK);
+        // Style the table header with a dark orange background and white text
+        employeeTable.getTableHeader().setBackground(new Color(0xFF8C00));
+        employeeTable.getTableHeader().setForeground(Color.WHITE);
+        
         loadEmployeeData();
 
-        // Make the scroll pane background match the main panel
+        // Create scroll pane and set its viewport background to white (so table cells remain white)
         JScrollPane scrollPane = new JScrollPane(employeeTable);
-        scrollPane.setBackground(MAIN_BG_COLOR);
-        scrollPane.getViewport().setBackground(Color.WHITE); 
-        // The table cells remain white; behind them is white. 
-        // The border area of the scroll pane uses MAIN_BG_COLOR.
-
+        scrollPane.getViewport().setBackground(Color.WHITE);
         add(scrollPane, BorderLayout.CENTER);
         
-        // Button panel for add, update, delete actions, set to soft white
+        // Create button panel and set its background to soft white
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(BUTTON_PANEL_COLOR);
         
@@ -276,11 +276,8 @@ public class EmployeeManagementPanel extends JPanel {
             JFrame frame = new JFrame("Employee Management Test");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 400);
-            
-            // We want the rest of the app to remain #ffc364, so let's do:
+            // Set frame background to orange (#ffc364)
             frame.getContentPane().setBackground(new Color(0xFFC364));
-            
-            // Then add the panel, which is also #ffc364 except for the bottom
             frame.add(new EmployeeManagementPanel());
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
