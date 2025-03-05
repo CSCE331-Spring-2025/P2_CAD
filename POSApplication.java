@@ -23,6 +23,7 @@ public class POSApplication extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 700);
         setLocationRelativeTo(null); // Center the window
+        setBackground(new Color(255, 153, 51)); // Set background to #ffc364
 
         // Create pages
         JPanel trendsPanel = new ManagerTrendsPanel();       // Displays overall trends
@@ -39,27 +40,50 @@ public class POSApplication extends JFrame implements ActionListener {
         add(cardPanel, BorderLayout.CENTER);
 
         // Navigation panel at the bottom
-        JPanel navPanel = new JPanel();
+        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        navPanel.setBackground(new Color(0xFFF9F4)); // soft white background for the nav panel
+
         JButton btnTrends = new JButton("Trends");
         JButton btnMenu = new JButton("Menu");
         JButton btnInventory = new JButton("Inventory");
         JButton btnEmployees = new JButton("Employees");
 
+        // Set action commands
         btnTrends.setActionCommand(TREND_PAGE);
         btnMenu.setActionCommand(MENU_PAGE);
         btnInventory.setActionCommand(INVENTORY_PAGE);
         btnEmployees.setActionCommand(EMPLOYEE_PAGE);
 
+        // Use a darker button background for contrast and set text color to black
+        Color buttonBg = new Color(0x8d3b00); // this is the same orange as before, or adjust as needed
+        btnTrends.setBackground(buttonBg);
+        btnTrends.setForeground(Color.BLACK);
+        btnMenu.setBackground(buttonBg);
+        btnMenu.setForeground(Color.BLACK);
+        btnInventory.setBackground(buttonBg);
+        btnInventory.setForeground(Color.BLACK);
+        btnEmployees.setBackground(buttonBg);
+        btnEmployees.setForeground(Color.BLACK);
+
+        // Optional: Remove the focus painted border for a cleaner look
+        btnTrends.setFocusPainted(false);
+        btnMenu.setFocusPainted(false);
+        btnInventory.setFocusPainted(false);
+        btnEmployees.setFocusPainted(false);
+
+        // Add action listeners
         btnTrends.addActionListener(this);
         btnMenu.addActionListener(this);
         btnInventory.addActionListener(this);
         btnEmployees.addActionListener(this);
 
+        // Add buttons to the navPanel
         navPanel.add(btnTrends);
         navPanel.add(btnMenu);
         navPanel.add(btnInventory);
         navPanel.add(btnEmployees);
 
+        // Add navPanel to the frame
         add(navPanel, BorderLayout.SOUTH);
     }
 
