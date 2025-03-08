@@ -1,3 +1,4 @@
+
 import java.awt.*;
 import java.sql.*;
 import javax.swing.*;
@@ -10,27 +11,38 @@ public class InventoryPage extends JPanel {
 
     public InventoryPage() {
         setLayout(new BorderLayout());
+        
+        // Add background color to the main panel (orange: #ffc364)
+        setBackground(new Color(0xFFC364));
 
-        // Table column names: ID, Name, Category, Current Stock
-        String[] columnNames = { "ID", "Name", "Category", "Current Stock" };
+        // Table column names: ID, Name, Category, Current Stock, Suggestion
+        String[] columnNames = { "ID", "Name", "Category", "Current Stock", "Suggestion" };
 
-        // Create table model
+        // Create table model (all cells non-editable)
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // No cell is editable in this view
+                return false;
             }
         };
 
         inventoryTable = new JTable(tableModel);
+        
+        // Optional: Style the table header colors
+        inventoryTable.getTableHeader().setBackground(new Color(0xFF8C00)); // Dark orange
+        inventoryTable.getTableHeader().setForeground(Color.WHITE);
+
         loadInventoryData(); // Populate data from the database
 
-        // Add table inside a scroll pane
         JScrollPane scrollPane = new JScrollPane(inventoryTable);
+        // Set the viewport background to the same orange for consistency
+        scrollPane.getViewport().setBackground(new Color(0xFFC364));
         add(scrollPane, BorderLayout.CENTER);
 
-        // Create a panel for action buttons
+        // Panel for action buttons
         JPanel buttonPanel = new JPanel();
+        // Set the button panel background to the same orange
+        buttonPanel.setBackground(new Color(0xFFC364));
         addButton = new JButton("Add Inventory Item");
         deleteButton = new JButton("Delete Selected Item");
         updateButton = new JButton("Update Selected Item");
@@ -48,26 +60,24 @@ public class InventoryPage extends JPanel {
     private void loadInventoryData() {
         tableModel.setRowCount(0); // Clear existing data
 
-        try {
-            Connection conn = DriverManager.getConnection(
+        try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
                 dbSetup.user,
-                dbSetup.pswd
-            );
-            Statement stmt = conn.createStatement();
-            // Query includes the category column
-            ResultSet rs = stmt.executeQuery("SELECT inventory_id, name, category, current_number FROM inventory");
-
+                dbSetup.pswd);
+             Statement stmt = conn.createStatement();
+             // Retrieve inventory_id, name, category, current_number, and inventory_suggestion
+             ResultSet rs = stmt.executeQuery("SELECT inventory_id, name, category, current_number, inventory_suggestion, seasonal FROM inventory ORDER BY inventory_id ASC")) {
+            
             while (rs.next()) {
                 int id = rs.getInt("inventory_id");
                 String name = rs.getString("name");
                 String category = rs.getString("category");
                 int currentStock = rs.getInt("current_number");
-
-                Object[] rowData = { id, name, category, currentStock };
+                int suggestion = rs.getInt("inventory_suggestion"); // Assuming inventory_suggestion is numeric
+                
+                Object[] rowData = { id, name, category, currentStock, suggestion };
                 tableModel.addRow(rowData);
             }
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error fetching inventory data.");
@@ -75,10 +85,11 @@ public class InventoryPage extends JPanel {
     }
 
     private void addNewItem() {
-        // Create input fields for item name, category, and stock quantity
+        // Input fields for item name, category, and stock quantity
         JTextField itemNameField = new JTextField();
         JTextField categoryField = new JTextField();
         JTextField stockField = new JTextField();
+        // Optional: you might later add an input for suggestion, but for now we'll leave it out or default it to 0.
 
         Object[] message = {
             "Item Name:", itemNameField,
@@ -86,9 +97,7 @@ public class InventoryPage extends JPanel {
             "Stock Quantity:", stockField
         };
 
-        int option = JOptionPane.showConfirmDialog(
-            null, message, "Add New Inventory Item", JOptionPane.OK_CANCEL_OPTION
-        );
+        int option = JOptionPane.showConfirmDialog(null, message, "Add New Inventory Item", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             String itemName = itemNameField.getText().trim();
             String category = categoryField.getText().trim();
@@ -106,7 +115,7 @@ public class InventoryPage extends JPanel {
                 return;
             }
 
-            // Auto assign the next available inventory_id
+            // Auto-assign the next available inventory_id
             int nextId = getNextInventoryId();
 
             if (nextId == -1) {
@@ -114,13 +123,10 @@ public class InventoryPage extends JPanel {
                 return;
             }
 
-            // Insert new item into the database with auto-assigned id
-            try {
-                Connection conn = DriverManager.getConnection(
+            try (Connection conn = DriverManager.getConnection(
                     "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
                     dbSetup.user,
-                    dbSetup.pswd
-                );
+                    dbSetup.pswd)) {
                 String query = "INSERT INTO inventory (inventory_id, name, category, current_number) VALUES (?, ?, ?, ?)";
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 pstmt.setInt(1, nextId);
@@ -132,11 +138,7 @@ public class InventoryPage extends JPanel {
                 }
                 pstmt.setInt(4, stockQuantity);
                 pstmt.executeUpdate();
-                conn.close();
-
-                // Refresh the inventory table
                 loadInventoryData();
-
                 JOptionPane.showMessageDialog(this, "Item added successfully with ID: " + nextId);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -145,23 +147,20 @@ public class InventoryPage extends JPanel {
         }
     }
 
-    // Method to query the next available inventory_id
+    // Query the next available inventory_id
     private int getNextInventoryId() {
         int nextId = -1;
-        try {
-            Connection conn = DriverManager.getConnection(
+        try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
                 dbSetup.user,
-                dbSetup.pswd
-            );
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT MAX(inventory_id) AS max_id FROM inventory");
+                dbSetup.pswd);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT MAX(inventory_id) AS max_id FROM inventory")) {
             if (rs.next()) {
                 nextId = rs.getInt("max_id") + 1;
             } else {
-                nextId = 1; // Start at 1 if no records exist
+                nextId = 1;
             }
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -177,27 +176,19 @@ public class InventoryPage extends JPanel {
 
         int id = (int) tableModel.getValueAt(selectedRow, 0); // Get inventory_id from first column
 
-        int confirm = JOptionPane.showConfirmDialog(
-            this, "Are you sure you want to delete this item?",
-            "Confirm Deletion", JOptionPane.YES_NO_OPTION
-        );
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this item?",
+                "Confirm Deletion", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            try {
-                Connection conn = DriverManager.getConnection(
+            try (Connection conn = DriverManager.getConnection(
                     "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
                     dbSetup.user,
-                    dbSetup.pswd
-                );
+                    dbSetup.pswd)) {
                 String query = "DELETE FROM inventory WHERE inventory_id = ?";
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 pstmt.setInt(1, id);
                 pstmt.executeUpdate();
-                conn.close();
-
-                // Refresh the table after deletion
                 loadInventoryData();
-
                 JOptionPane.showMessageDialog(this, "Item deleted successfully.");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -206,7 +197,7 @@ public class InventoryPage extends JPanel {
         }
     }
 
-    // New method: Update selected item's current stock
+    // Update selected item's current stock
     private void updateSelectedItem() {
         int selectedRow = inventoryTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -238,20 +229,15 @@ public class InventoryPage extends JPanel {
         }
         
         // Update the database with the new stock value
-        try {
-            Connection conn = DriverManager.getConnection(
+        try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
                 dbSetup.user,
-                dbSetup.pswd
-            );
+                dbSetup.pswd)) {
             String query = "UPDATE inventory SET current_number = ? WHERE inventory_id = ?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setInt(1, newStock);
             pstmt.setInt(2, id);
             pstmt.executeUpdate();
-            conn.close();
-            
-            // Refresh the table after update
             loadInventoryData();
             JOptionPane.showMessageDialog(this, "Item updated successfully.");
         } catch (Exception e) {
@@ -266,6 +252,7 @@ public class InventoryPage extends JPanel {
             JFrame frame = new JFrame("Inventory Management Test");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 400);
+            frame.getContentPane().setBackground(new Color(0xFFC364)); // Frame background in orange
             frame.add(new InventoryPage());
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);

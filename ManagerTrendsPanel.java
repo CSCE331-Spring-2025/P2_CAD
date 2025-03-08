@@ -4,15 +4,28 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
+/**
+ * The ManagerTrendsPanel class represents a panel in the POS system that displays various trends and reports
+ * for managers. It includes features such as total revenue, best days of the week, top-selling menu items,
+ * and the ability to generate daily, X-, and Z-reports. The panel is designed to provide insights into
+ * sales performance and inventory usage.
+ * 
+ * @author Rayan Ali, Sareem MominKhoja, Chloe Lee, Chase Varghese
+ */
 public class ManagerTrendsPanel extends JPanel {
     // Database credentials from dbSetup
     private static final String DB_URL = "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db";
     private static final String DB_USER = dbSetup.user;
     private static final String DB_PASSWORD = dbSetup.pswd;
 
+    /**
+     * Constructs the ManagerTrendsPanel.
+     * Initializes the GUI components, including labels, tables, and buttons for displaying trends and reports.
+     */
     public ManagerTrendsPanel() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBackground(new Color(255, 195, 100)); // Set background to #ffc364
 
         // 1. Total revenue label at the top (for the past 39 weeks)
         double totalRevenue = getTotalRevenue();
@@ -24,7 +37,7 @@ public class ManagerTrendsPanel extends JPanel {
 
         // 2. Best Days of the Week Panel (X-Report)
         JPanel dowPanel = new JPanel(new BorderLayout());
-        dowPanel.setBorder(new TitledBorder("Best Days of the Week (Past 39 Weeks) [X-Report]"));
+        dowPanel.setBorder(new TitledBorder("Best Days of the Week (Past 39 Weeks)"));
         dowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         JTable dowTable = new JTable();
         DefaultTableModel dowModel = new DefaultTableModel(new String[]{"Day", "Revenue"}, 0);
@@ -54,7 +67,7 @@ public class ManagerTrendsPanel extends JPanel {
 
         // 4. Top 25 Best Days Overall Panel (Z-Report)
         JPanel bestDaysPanel = new JPanel(new BorderLayout());
-        bestDaysPanel.setBorder(new TitledBorder("Top 25 Best Days (Overall) [Z-Report]"));
+        bestDaysPanel.setBorder(new TitledBorder("Top 25 Best Days (Overall)"));
         bestDaysPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         JTable bestDaysTable = new JTable();
         DefaultTableModel bestDaysModel = new DefaultTableModel(new String[]{"Date", "Revenue"}, 0);
@@ -78,8 +91,29 @@ public class ManagerTrendsPanel extends JPanel {
         buttonPanel.add(xReportButton);
 
         JButton zReportButton = new JButton("Z-Report (End of Day)");
-        zReportButton.addActionListener(e -> generateZReport());
+        zReportButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "<html><b>Reminder:</b> The Z-Report should only be run at the end of the business day.<br>" +
+                "Running this report will finalize today's sales, reset totals for tomorrow, and cannot be undone.<br><br>" +
+                "<b>This report includes:</b><br>" +
+                "✅ Sales and tax information<br>" +
+                "✅ Payment methods summary<br>" +
+                "✅ Total cash collected<br>" +
+                "✅ Discounts, voids, and service charges<br>" +
+                "✅ Employee signatures for accountability<br><br>" +
+                "<b>Are you sure you want to proceed?</b>",
+                "Confirm End-of-Day Z-Report",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            );
+        
+            if (confirm == JOptionPane.YES_OPTION) {
+                generateZReport(); // Only runs if the user confirms
+            }
+        });
         buttonPanel.add(zReportButton);
+        
 
         buttonPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(buttonPanel);
@@ -93,6 +127,11 @@ public class ManagerTrendsPanel extends JPanel {
 
     // ------------------ Helper Methods ------------------
 
+    /**
+     * Retrieves the total revenue for the past 39 weeks from the database.
+     *
+     * @return the total revenue as a double
+     */
     private double getTotalRevenue() {
         double revenue = 0.0;
         String query = "SELECT SUM(Total_Price) AS total_revenue FROM customer_order " +
@@ -109,6 +148,11 @@ public class ManagerTrendsPanel extends JPanel {
         return revenue;
     }
 
+    /**
+     * Retrieves the best days of the week in terms of revenue for the past 39 weeks.
+     *
+     * @return a 2D array containing the day names and their corresponding revenue
+     */
     private Object[][] getBestDaysOfWeek() {
         Object[][] data = new Object[7][2];
         String[] dayNames = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
@@ -137,6 +181,11 @@ public class ManagerTrendsPanel extends JPanel {
         return data;
     }
 
+    /**
+     * Creates a panel displaying the best days of the week in terms of revenue.
+     *
+     * @return a JPanel containing the best days of the week table
+     */
     private JPanel createBestDaysPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(new TitledBorder("Best Days of the Week (Past 39 Weeks) [X-Report]"));
@@ -151,6 +200,11 @@ public class ManagerTrendsPanel extends JPanel {
         return panel;
     }
 
+    /**
+     * Retrieves the top 10 best-selling menu items from the database.
+     *
+     * @return a 2D array containing the menu item names and their corresponding sold counts
+     */
     private Object[][] getTopMenuItems() {
         String query = "SELECT m.name, COUNT(*) AS sold_count " +
                        "FROM C_M_Junction cmj " +
@@ -174,6 +228,11 @@ public class ManagerTrendsPanel extends JPanel {
         return data;
     }
 
+    /**
+     * Creates a panel displaying the top 10 best-selling menu items.
+     *
+     * @return a JPanel containing the top 10 best-selling menu items table
+     */
     private JPanel createBestSellingMenuPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(new TitledBorder("Top 10 Best Selling Menu Items"));
@@ -188,6 +247,11 @@ public class ManagerTrendsPanel extends JPanel {
         return panel;
     }
 
+    /**
+     * Retrieves the top 25 best days in terms of revenue from the database.
+     *
+     * @return a 2D array containing the dates and their corresponding revenue
+     */
     private Object[][] getBestDaysOfYear() {
         String query = "SELECT DATE(Time) AS order_date, SUM(Total_Price) AS revenue " +
                        "FROM customer_order " +
@@ -210,6 +274,11 @@ public class ManagerTrendsPanel extends JPanel {
         return data;
     }
 
+    /**
+     * Creates a panel displaying the top 25 best days in terms of revenue.
+     *
+     * @return a JPanel containing the top 25 best days table
+     */
     private JPanel createBestDaysOverallPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(new TitledBorder("Top 25 Best Days (Overall) [Z-Report]"));
@@ -224,6 +293,11 @@ public class ManagerTrendsPanel extends JPanel {
         return panel;
     }
 
+    /**
+     * Creates a panel with a button to generate a daily report.
+     *
+     * @return a JPanel containing the daily report button
+     */
     private JPanel createDailyReportPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton button = new JButton("Generate Daily Report");
@@ -232,6 +306,9 @@ public class ManagerTrendsPanel extends JPanel {
         return panel;
     }
 
+    /**
+     * Generates a daily report for a specific date and displays it in a dialog.
+     */
     private void generateDailyReport() {
         String dateStr = JOptionPane.showInputDialog(this, "Enter date (YYYY-MM-DD):");
         if (dateStr == null || dateStr.trim().isEmpty()) {
@@ -302,7 +379,11 @@ public class ManagerTrendsPanel extends JPanel {
         JOptionPane.showMessageDialog(this, reportPanel, "Daily Report", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // CHART 
+    /**
+     * Creates a panel for displaying product usage data with date and time range selection.
+     *
+     * @return a JPanel containing the product usage chart and controls
+     */
     private JPanel createProductUsagePanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(new TitledBorder("Product Usage Chart"));
@@ -370,6 +451,14 @@ public class ManagerTrendsPanel extends JPanel {
         return panel;
     }
     
+    /**
+     * Populates the product usage table with data from the database for the specified date and time range.
+     *
+     * @param model the table model to populate
+     * @param selectedDate the selected date
+     * @param startHour the start hour
+     * @param endHour the end hour
+     */
     private void populateProductUsageData(DefaultTableModel model, java.sql.Date selectedDate, int startHour, int endHour) {
         String query = "SELECT i.name, COUNT(*) AS used_count " +
                        "FROM C_M_Junction cmj " +
@@ -402,28 +491,31 @@ public class ManagerTrendsPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Error fetching product usage data.");
         }
     }
-    //CHART ABOVE
 
+    /**
+     * Generates an X-Report, which includes hourly sales, menu items ordered per hour,
+     * top-selling menu items, and inventory usage for the current day.
+     */
     private void generateXReport() {
         // 1) Sales per hour
         DefaultTableModel hourSalesModel = new DefaultTableModel(new String[]{"Hour", "Total Sales"}, 0);
         String querySalesPerHour =
-            "SELECT EXTRACT(HOUR FROM Time) AS hr, SUM(Total_Price) AS sales " +
+            "SELECT TO_CHAR(DATE_TRUNC('hour', Time), 'FMHH12 AM') AS hr, SUM(Total_Price) AS sales " +
             "FROM customer_order " +
             "WHERE DATE(Time) = CURRENT_DATE " +
-            "GROUP BY hr " +
-            "ORDER BY hr";
+            "GROUP BY DATE_TRUNC('hour', Time) " +
+            "ORDER BY DATE_TRUNC('hour', Time)";
         runQueryToTable(querySalesPerHour, hourSalesModel);
 
         // 2) Number of menu items ordered per hour
         DefaultTableModel hourItemsModel = new DefaultTableModel(new String[]{"Hour", "Items Ordered"}, 0);
         String queryItemsPerHour =
-            "SELECT EXTRACT(HOUR FROM co.Time) AS hr, COUNT(*) AS items_ordered " +
+            "SELECT TO_CHAR(DATE_TRUNC('hour', co.Time), 'FMHH12 AM') AS hr, COUNT(*) AS items_ordered " +
             "FROM C_M_Junction cmj " +
             "JOIN customer_order co ON co.Order_ID = cmj.Order_ID " +
             "WHERE DATE(co.Time) = CURRENT_DATE " +
-            "GROUP BY hr " +
-            "ORDER BY hr";
+            "GROUP BY DATE_TRUNC('hour', co.Time) " +
+            "ORDER BY DATE_TRUNC('hour', co.Time)";
         runQueryToTable(queryItemsPerHour, hourItemsModel);
 
         // 3) All menu items sold today (from greatest to least)
@@ -478,14 +570,33 @@ public class ManagerTrendsPanel extends JPanel {
         JOptionPane.showMessageDialog(this, scrollPane, "X-Report (Current Day)", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Generates a Z-Report, which includes total sales, tax, top-selling menu items,
+     * and inventory usage for the current day. This report is typically run at the end of the business day.
+     */
     private void generateZReport() {
         // 1) Total Sales for the Day
         double totalSales = 0.0;
+        int totalOrders = 0;
+        
+        // Query for total sales
         String queryTotalSales =
-            "SELECT SUM(Total_Price) AS sales " +
-            "FROM customer_order " +
-            "WHERE DATE(Time) = CURRENT_DATE";
-
+            "SELECT SUM(Total_Price) AS sales FROM customer_order WHERE DATE(Time) = CURRENT_DATE";
+        totalSales = runQueryForTotalSales(queryTotalSales);
+    
+        // Query for total orders
+        String queryTotalOrders =
+            "SELECT COUNT(*) AS orders FROM customer_order WHERE DATE(Time) = CURRENT_DATE";
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(queryTotalOrders)) {
+            if (rs.next()) {
+                totalOrders = rs.getInt("orders");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    
         // 2) All menu items sold today (from greatest to least)
         DefaultTableModel topMenuItemModel = new DefaultTableModel(new String[]{"Menu Item", "Sold Count"}, 0);
         String queryTopMenuToday =
@@ -497,7 +608,7 @@ public class ManagerTrendsPanel extends JPanel {
             "GROUP BY m.name " +
             "ORDER BY cnt DESC";
         runQueryToTable(queryTopMenuToday, topMenuItemModel);
-
+    
         // 3) All inventory items used (today)
         DefaultTableModel inventoryUsedModel = new DefaultTableModel(new String[]{"Inventory Item", "Used Count"}, 0);
         String queryInventoryUsedToday =
@@ -511,30 +622,65 @@ public class ManagerTrendsPanel extends JPanel {
             "GROUP BY i.name " +
             "ORDER BY used_count DESC";
         runQueryToTable(queryInventoryUsedToday, inventoryUsedModel);
-
-        totalSales = runQueryForTotalSales(queryTotalSales);
-
+    
+        // Calculate tax at 8.25%
+        double tax = totalSales * 0.0825;
+    
+        // Build the Z-Report panel
         JPanel zPanel = new JPanel();
         zPanel.setLayout(new BoxLayout(zPanel, BoxLayout.Y_AXIS));
-
-        zPanel.add(new JLabel("Z-Report (End of Day)"));
-        zPanel.add(new JLabel("Total Sales (Today): $" + String.format("%.2f", totalSales)));
-
-        zPanel.add(new JLabel("All Menu Items Sold Today (Greatest to Least):"));
+    
+        // "Z-Report (End of Day)" label, left-aligned
+        JLabel zReportLabel = new JLabel("Z-Report (End of Day)");
+        zReportLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        zReportLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(zReportLabel);
+    
+        // Show total orders, total sales, and tax in a big label, left-aligned
+        Font bigFont = new Font("SansSerif", Font.BOLD, 16);
+        JLabel summaryLabel = new JLabel(
+            "Orders: " + totalOrders +
+            "   |   Total Cash: $" + String.format("%.2f", totalSales) +
+            "   |   Tax (8.25%): $" + String.format("%.2f", tax)
+        );
+        summaryLabel.setFont(bigFont);
+        summaryLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        summaryLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(summaryLabel);
+    
+        // Label for "All Menu Items Sold Today", left-aligned
+        JLabel menuItemsLabel = new JLabel("All Menu Items Sold Today (Greatest to Least):");
+        menuItemsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        menuItemsLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(menuItemsLabel);
+    
         JTable topMenuTable = new JTable(topMenuItemModel);
         zPanel.add(new JScrollPane(topMenuTable));
-
-        zPanel.add(new JLabel("All Inventory Items Used (Today):"));
+    
+        // Label for "All Inventory Items Used (Today):", left-aligned
+        JLabel invUsedLabel = new JLabel("All Inventory Items Used (Today):");
+        invUsedLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        invUsedLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        zPanel.add(invUsedLabel);
+    
         JTable invUsedTable = new JTable(inventoryUsedModel);
         zPanel.add(new JScrollPane(invUsedTable));
-
+    
         JScrollPane scrollPane = new JScrollPane(zPanel);
         scrollPane.setPreferredSize(new Dimension(700, 500));
-
+    
         JOptionPane.showMessageDialog(this, scrollPane, "Z-Report (End of Day)", JOptionPane.INFORMATION_MESSAGE);
     }
+    
 
     // ------------------ Helper Methods ------------------
+
+    /**
+     * Executes a SQL query and populates the provided table model with the results.
+     *
+     * @param query the SQL query to execute
+     * @param model the table model to populate
+     */
     private void runQueryToTable(String query, DefaultTableModel model) {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              Statement stmt = conn.createStatement();
@@ -552,6 +698,12 @@ public class ManagerTrendsPanel extends JPanel {
         }
     }
 
+    /**
+     * Executes a SQL query to retrieve the total sales for the current day.
+     *
+     * @param query the SQL query to execute
+     * @return the total sales as a double
+     */
     private double runQueryForTotalSales(String query) {
         double result = 0.0;
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
@@ -567,6 +719,12 @@ public class ManagerTrendsPanel extends JPanel {
     }
 
     // ------------------ Main Method ------------------
+
+    /**
+     * The main method to launch the ManagerTrendsPanel in a standalone frame.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Manager Trends");
