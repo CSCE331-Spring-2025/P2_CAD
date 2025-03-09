@@ -2,6 +2,13 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+/**
+ * The POSApplication class represents the main application window for the Point of Sale (POS) system.
+ * It provides a manager dashboard with navigation to different pages such as Trends, Menu, Inventory, and Employees.
+ * The application uses a CardLayout to manage the different panels and provides a consistent user interface.
+ * 
+ * @author Rayan Ali, Sareem MominKhoja, Chloe Lee, Chase Varghese
+ */
 public class POSApplication extends JFrame implements ActionListener {
     // CardLayout to manage different pages
     private CardLayout cardLayout = new CardLayout();
@@ -18,6 +25,10 @@ public class POSApplication extends JFrame implements ActionListener {
     private final String INVENTORY_PAGE = "Inventory";
     private final String EMPLOYEE_PAGE = "Employees";
 
+    /**
+     * Constructs the POSApplication window.
+     * Initializes the GUI components, sets up the CardLayout, and creates navigation buttons.
+     */
     public POSApplication() {
         setTitle("POS System - Manager Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -87,11 +98,21 @@ public class POSApplication extends JFrame implements ActionListener {
         add(navPanel, BorderLayout.SOUTH);
     }
 
+    /**
+     * Handles button click events to switch between different panels in the CardLayout.
+     *
+     * @param e the ActionEvent triggered by a button click
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         cardLayout.show(cardPanel, e.getActionCommand());
     }
 
+    /**
+     * The main method to launch the POSApplication.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new POSApplication().setVisible(true));
     }

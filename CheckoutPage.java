@@ -2,11 +2,23 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
+/**
+ * The CheckoutPage class represents the checkout interface for processing payments.
+ * It displays the selected items, total price, and payment method options.
+ *
+ * @author Sareem Mominkhoja, Rayan Ali, Chloe Lee, Chase Varghese
+ */
 public class CheckoutPage extends JFrame {
     private ArrayList<String> selectedItems;
     private ArrayList<Double> selectedPrices;
     private JLabel totalLabel;
 
+    /**
+     * Constructs a CheckoutPage with the selected items and their prices.
+     *
+     * @param items  The list of selected item names.
+     * @param prices The list of corresponding item prices.
+     */
     public CheckoutPage(ArrayList<String> items, ArrayList<Double> prices) {
         this.selectedItems = items;
         this.selectedPrices = prices;
@@ -55,10 +67,21 @@ public class CheckoutPage extends JFrame {
         add(paymentPanel, BorderLayout.SOUTH);
     }
 
+    /**
+     * Calculates the total price of all selected items.
+     *
+     * @return The total amount to be paid.
+     */
     private double calculateTotal() {
         return selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
     }
 
+    /**
+     * Handles the payment process based on the selected payment method.
+     * Displays a message confirming the selected payment method.
+     *
+     * @param paymentMethod The chosen method of payment (Credit/Debit Card or Cash).
+     */
     private void proceedToPayment(String paymentMethod) {
         String message = "Proceeding with payment via " + paymentMethod;
 
