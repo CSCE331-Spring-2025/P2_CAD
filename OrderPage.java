@@ -5,13 +5,27 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 
+/**
+ * The OrderPage class represents a graphical user interface for placing orders.
+ * It allows users to select menu items, view their order summary, and proceed to checkout.
+ * The interface is designed with a soft orange theme and supports both customers and employees.
+ * Employees have additional privileges, such as removing items from the order.
+ * 
+ * @author Rayan Ali, Sareem MominKhoja, Chloe Lee, Chase Varghese
+ */
 public class OrderPage extends JFrame {
-    private JPanel orderListPanel;
-    private JLabel totalLabel;
-    private ArrayList<String> selectedItems;
-    private ArrayList<Double> selectedPrices;
-    private boolean isEmployee;
+    private JPanel orderListPanel; // Panel to display the list of selected items
+    private JLabel totalLabel; // Label to display the total price of the order
+    private ArrayList<String> selectedItems; // List of selected menu item names
+    private ArrayList<Double> selectedPrices; // List of selected menu item prices
+    private boolean isEmployee; // Flag to indicate if the user is an employee
 
+    /**
+     * Constructs an OrderPage with the specified employee status.
+     * Initializes the GUI components, fetches menu items from the database, and sets up event listeners.
+     *
+     * @param isEmployee a boolean indicating whether the user is an employee
+     */
     public OrderPage(boolean isEmployee) {
         this.isEmployee = isEmployee;
         setTitle("Place Order");
@@ -19,7 +33,7 @@ public class OrderPage extends JFrame {
         setSize(900, 500);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        
+
         // Set frame content background to soft orange (#FFC364)
         getContentPane().setBackground(new Color(0xFFC364));
 
@@ -28,7 +42,6 @@ public class OrderPage extends JFrame {
 
         // Left Side: Menu Items Panel
         JPanel menuPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-        // Set menu panel background to soft orange
         menuPanel.setBackground(new Color(0xFFC364));
         JScrollPane menuScroll = new JScrollPane(menuPanel);
         menuScroll.getViewport().setBackground(new Color(0xFFC364));
@@ -37,17 +50,14 @@ public class OrderPage extends JFrame {
         // Right Side: Order Summary Panel
         JPanel orderPanel = new JPanel(new BorderLayout());
         orderPanel.setPreferredSize(new Dimension(300, 500));
-        // Set order panel background to soft orange
         orderPanel.setBackground(new Color(0xFFC364));
 
         orderListPanel = new JPanel();
         orderListPanel.setLayout(new BoxLayout(orderListPanel, BoxLayout.Y_AXIS));
-        // Keep order list panel white for clarity
         orderListPanel.setBackground(Color.WHITE);
 
         JScrollPane orderScroll = new JScrollPane(orderListPanel);
         orderScroll.setPreferredSize(new Dimension(300, 350));
-        // Keep the viewport white so table cells remain clear
         orderScroll.getViewport().setBackground(Color.WHITE);
         orderPanel.add(orderScroll, BorderLayout.CENTER);
 
@@ -78,7 +88,6 @@ public class OrderPage extends JFrame {
                 double itemPrice = rs.getDouble("Price");
 
                 JButton itemButton = new JButton(itemName + " - $" + itemPrice);
-                // Set menu item button background to a light orange and text to black
                 itemButton.setBackground(new Color(0xFFCC80));
                 itemButton.setForeground(Color.BLACK);
                 itemButton.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -93,18 +102,22 @@ public class OrderPage extends JFrame {
         }
     }
 
+    /**
+     * Adds a selected menu item to the order list and updates the total price.
+     *
+     * @param itemName the name of the menu item to add
+     * @param price    the price of the menu item to add
+     */
     private void addItemToOrder(String itemName, double price) {
         selectedItems.add(itemName);
         selectedPrices.add(price);
 
         JPanel itemPanel = new JPanel(new BorderLayout());
-        // Optional: Set background for the item panel if desired
         itemPanel.setBackground(Color.WHITE);
         JLabel itemLabel = new JLabel(itemName + " - $" + price);
         itemLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
         // Only show the "X" button if an employee is logged in.
-        // DO NOT change styling for the remove button.
         if (isEmployee) {
             JButton removeButton = new JButton("X");
             removeButton.setPreferredSize(new Dimension(30, 30));
@@ -120,6 +133,13 @@ public class OrderPage extends JFrame {
         updateTotal();
     }
 
+    /**
+     * Removes a selected menu item from the order list and updates the total price.
+     *
+     * @param itemPanel the panel representing the item to remove
+     * @param itemName  the name of the menu item to remove
+     * @param price     the price of the menu item to remove
+     */
     private void removeItem(JPanel itemPanel, String itemName, double price) {
         selectedItems.remove(itemName);
         selectedPrices.remove(price);
@@ -129,20 +149,27 @@ public class OrderPage extends JFrame {
         updateTotal();
     }
 
+    /**
+     * Updates the total price label based on the current selected items.
+     */
     private void updateTotal() {
         double total = selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
         totalLabel.setText("Total: $" + String.format("%.2f", total));
     }
 
+    /**
+     * Handles the checkout process. Saves the order to the database, updates order history,
+     * and opens the CheckoutPage to finalize payment.
+     */
     private void checkoutOrder() {
         if (selectedItems.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No items selected!");
             return;
         }
-        
+
         // Save the order to the database and update history
         double totalPrice = selectedPrices.stream().mapToDouble(Double::doubleValue).sum();
-        
+
         // Add the order with timestamp to the OrderHistoryPage and get the order id
         int orderId = OrderHistoryPage.addOrderToHistory(totalPrice);
 
@@ -155,7 +182,7 @@ public class OrderPage extends JFrame {
         for (Map.Entry<String, Integer> entry : itemCount.entrySet()) {
             String itemName = entry.getKey();
             int quantity = entry.getValue();
-            
+
             int menuId = OrderHistoryPage.getMenuIdFromName(itemName);
             if (menuId != -1) {
                 OrderHistoryPage.addMenuItemToOrder(orderId, menuId, quantity);
@@ -163,7 +190,7 @@ public class OrderPage extends JFrame {
                 System.out.println("Error: Menu ID not found for item " + itemName);
             }
         }
-    
+
         // Open the CheckoutPage with the current order summary
         CheckoutPage checkoutPage = new CheckoutPage(selectedItems, selectedPrices);
         checkoutPage.setVisible(true);

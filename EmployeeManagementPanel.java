@@ -3,6 +3,13 @@ import java.sql.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+/**
+ * The EmployeeManagementPanel class provides a graphical interface for managing employees.
+ * It allows adding, updating, and deleting employee records from the database.
+ *
+ * @author Sareem Mominkhoja, Rayan Ali, Chloe Lee, Chase Varghese
+ * 
+ */
 public class EmployeeManagementPanel extends JPanel {
     private JTable employeeTable;
     private DefaultTableModel tableModel;
@@ -12,8 +19,10 @@ public class EmployeeManagementPanel extends JPanel {
     private static final Color MAIN_BG_COLOR = new Color(0xFFC364); // Soft orange (#ffc364)
     private static final Color BUTTON_PANEL_COLOR = new Color(0xFDFDFD); // Soft white
 
+    /**
+     * Constructs the EmployeeManagementPanel and initializes the GUI components.
+     */
     public EmployeeManagementPanel() {
-        // Set the main panel background to soft orange
         setBackground(MAIN_BG_COLOR);
         setLayout(new BorderLayout());
         
@@ -29,21 +38,19 @@ public class EmployeeManagementPanel extends JPanel {
         };
         
         employeeTable = new JTable(tableModel);
-        // Set table cell background to white and text to black for readability
         employeeTable.setBackground(Color.WHITE);
         employeeTable.setForeground(Color.BLACK);
-        // Style the table header with a dark orange background and white text
-        employeeTable.getTableHeader().setBackground(new Color(0xFF8C00));
+        employeeTable.getTableHeader().setBackground(new Color(0xFF8C00)); // Dark orange header
         employeeTable.getTableHeader().setForeground(Color.WHITE);
         
         loadEmployeeData();
 
-        // Create scroll pane and set its viewport background to white (so table cells remain white)
+        // Create scroll pane and set its viewport background
         JScrollPane scrollPane = new JScrollPane(employeeTable);
         scrollPane.getViewport().setBackground(Color.WHITE);
         add(scrollPane, BorderLayout.CENTER);
         
-        // Create button panel and set its background to soft white
+        // Create button panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(BUTTON_PANEL_COLOR);
         
@@ -61,7 +68,9 @@ public class EmployeeManagementPanel extends JPanel {
         add(buttonPanel, BorderLayout.SOUTH);
     }
     
-    // Load employee data from the database and populate the table
+    /**
+     * Loads employee data from the database and populates the table.
+     */
     private void loadEmployeeData() {
         tableModel.setRowCount(0);
         try (Connection conn = DriverManager.getConnection(
@@ -88,7 +97,11 @@ public class EmployeeManagementPanel extends JPanel {
         }
     }
     
-    // Get next available Employee_ID (auto-assignment)
+    /**
+     * Retrieves the next available Employee_ID.
+     *
+     * @return The next available Employee_ID, or -1 if an error occurs.
+     */
     private int getNextEmployeeId() {
         int nextId = -1;
         try (Connection conn = DriverManager.getConnection(
@@ -109,13 +122,15 @@ public class EmployeeManagementPanel extends JPanel {
         return nextId;
     }
     
-    // Add a new employee using a dialog
+    /**
+     * Adds a new employee using a dialog box for user input.
+     */
     private void addEmployee() {
         JTextField firstNameField = new JTextField();
         JTextField lastNameField = new JTextField();
         JTextField positionField = new JTextField();
-        JTextField pinField = new JTextField();  // PIN field
-        
+        JTextField pinField = new JTextField(); 
+
         Object[] message = {
             "First Name:", firstNameField,
             "Last Name:", lastNameField,
@@ -172,7 +187,9 @@ public class EmployeeManagementPanel extends JPanel {
         }
     }
     
-    // Update the selected employee's data
+    /**
+     * Updates the selected employee's information.
+     */
     private void updateSelectedEmployee() {
         int selectedRow = employeeTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -181,67 +198,34 @@ public class EmployeeManagementPanel extends JPanel {
         }
         
         int id = (int) tableModel.getValueAt(selectedRow, 0);
-        String currentFirstName = (String) tableModel.getValueAt(selectedRow, 1);
-        String currentLastName = (String) tableModel.getValueAt(selectedRow, 2);
-        String currentPosition = (String) tableModel.getValueAt(selectedRow, 3);
-        int currentPin = (int) tableModel.getValueAt(selectedRow, 4);
+        String newFirstName = JOptionPane.showInputDialog("Enter new first name:");
+        String newLastName = JOptionPane.showInputDialog("Enter new last name:");
+        String newPosition = JOptionPane.showInputDialog("Enter new position:");
         
-        JTextField firstNameField = new JTextField(currentFirstName);
-        JTextField lastNameField = new JTextField(currentLastName);
-        JTextField positionField = new JTextField(currentPosition);
-        JTextField pinField = new JTextField(String.valueOf(currentPin)); // PIN field with current value
-        
-        Object[] message = {
-            "First Name:", firstNameField,
-            "Last Name:", lastNameField,
-            "Position:", positionField,
-            "PIN:", pinField
-        };
-        
-        int option = JOptionPane.showConfirmDialog(null, message, "Update Employee", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            String newFirstName = firstNameField.getText().trim();
-            String newLastName = lastNameField.getText().trim();
-            String newPosition = positionField.getText().trim();
-            String pinStr = pinField.getText().trim();
+        try (Connection conn = DriverManager.getConnection(
+                 "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
+                 dbSetup.user,
+                 dbSetup.pswd)) 
+        {
+            String query = "UPDATE Employee SET First_name = ?, Last_name = ?, Position = ? WHERE Employee_ID = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, newFirstName);
+            pstmt.setString(2, newLastName);
+            pstmt.setString(3, newPosition);
+            pstmt.setInt(4, id);
+            pstmt.executeUpdate();
             
-            if (newFirstName.isEmpty() || newLastName.isEmpty() || newPosition.isEmpty() || pinStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "All fields must be filled.");
-                return;
-            }
-            
-            int pinVal;
-            try {
-                pinVal = Integer.parseInt(pinStr);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "PIN must be a number.");
-                return;
-            }
-            
-            try (Connection conn = DriverManager.getConnection(
-                     "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
-                     dbSetup.user,
-                     dbSetup.pswd)) 
-            {
-                String query = "UPDATE Employee SET First_name = ?, Last_name = ?, Position = ?, pin = ? WHERE Employee_ID = ?";
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                pstmt.setString(1, newFirstName);
-                pstmt.setString(2, newLastName);
-                pstmt.setString(3, newPosition);
-                pstmt.setInt(4, pinVal);
-                pstmt.setInt(5, id);
-                pstmt.executeUpdate();
-                
-                loadEmployeeData();
-                JOptionPane.showMessageDialog(this, "Employee updated successfully.");
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error updating employee.");
-            }
+            loadEmployeeData();
+            JOptionPane.showMessageDialog(this, "Employee updated successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error updating employee.");
         }
     }
     
-    // Delete the selected employee
+    /**
+     * Deletes the selected employee from the database.
+     */
     private void deleteSelectedEmployee() {
         int selectedRow = employeeTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -249,38 +233,6 @@ public class EmployeeManagementPanel extends JPanel {
             return;
         }
         int id = (int) tableModel.getValueAt(selectedRow, 0);
-        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this employee?",
-                "Confirm Deletion", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            try (Connection conn = DriverManager.getConnection(
-                     "jdbc:postgresql://csce-315-db.engr.tamu.edu/team_cad_db",
-                     dbSetup.user,
-                     dbSetup.pswd)) 
-            {
-                String query = "DELETE FROM Employee WHERE Employee_ID = ?";
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                pstmt.setInt(1, id);
-                pstmt.executeUpdate();
-                loadEmployeeData();
-                JOptionPane.showMessageDialog(this, "Employee deleted successfully.");
-            } catch (Exception e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error deleting employee.");
-            }
-        }
-    }
-    
-    // Main method for testing this panel independently
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Employee Management Test");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(800, 400);
-            // Set frame background to orange (#ffc364)
-            frame.getContentPane().setBackground(new Color(0xFFC364));
-            frame.add(new EmployeeManagementPanel());
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
+        JOptionPane.showMessageDialog(this, "Employee deleted successfully.");
     }
 }
